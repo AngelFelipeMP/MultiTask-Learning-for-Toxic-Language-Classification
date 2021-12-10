@@ -186,6 +186,9 @@ class MachampUniversalReader(DatasetReader):
         a corresponding label from a specific column.
         """
         data = []
+        # print(dataset)
+        # print('---------------------')
+        # print(self.datasets[dataset])
         sent_idxs = self.datasets[dataset]['sent_idxs']
         for sent_counter, instance in enumerate(lines2data(path, self.do_lowercase)):
             task2type = {}
@@ -233,6 +236,13 @@ class MachampUniversalReader(DatasetReader):
                 task2type[task] = task_type
                 col_idxs[task] = task_idx
                 if task_type == 'classification':
+                    # print(task)
+                    # print('---------------------')
+                    # print(task_idx)
+                    # print('---------------------')
+                    # print(sent_tasks)
+                    # print('---------------------')
+                    # print(instance)
                     sent_tasks[task] = instance[task_idx]
                 else:
                     logger.error('Task type ' + task_type + ' for task ' + task + ' in dataset ' +

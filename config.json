@@ -1,8 +1,8 @@
 {
     "EXIST": {
-        "train_data_path": "/content/machamp/no_header_EXIST2021_training.tsv",
-        "validation_data_path": "/content/machamp/no_header_EXIST2021_test_with_labeled.tsv",
-        "sent_idxs": 4,
+        "train_data_path": "/content/data/EXIST2021_training_processed.tsv",
+        "validation_data_path": "/content/data/EXIST2021_test_with_labeled_processed.tsv",
+        "sent_idxs": [4],
         "tasks":{
             "sexism": {
                 "task_type": "classification",
@@ -11,9 +11,9 @@
         }
     },
     "DETOXIS": {
-        "train_data_path": "/content/machamp/no_header_DETOXIS2021_train.tsv",
-        "validation_data_path": "/content/machamp/no_header_DETOXIS2021_test_with_labels.tsv",
-        "sent_idxs": 5,
+        "train_data_path": "/content/data/DETOXIS2021_train_processed.tsv",
+        "validation_data_path": "/content/data/DETOXIS2021_test_with_labels_processed.tsv",
+        "sent_idxs": [5],
         "tasks":{
             "toxicity": {
                 "task_type": "classification",
