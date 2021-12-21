@@ -67,7 +67,7 @@ class MachampClassifier(Model):
         elif self.metric == "macro-f1":
             self.metrics = {"macro-f1": FBetaMeasure(average='macro')}
         elif self.metric == "f1":
-            self.metrics = {"f1": F1Measure(positive_label=0)}
+            self.metrics = {"f1": F1Measure(positive_label=1)}
         else:
             print(f"ERROR. Metric \"{metric}\" unrecognized. Using accuracy \"acc\" instead.")
             self.metrics = {"acc": CategoricalAccuracy()}

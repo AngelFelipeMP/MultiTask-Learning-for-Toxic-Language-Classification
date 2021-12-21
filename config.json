@@ -6,7 +6,8 @@
         "tasks":{
             "sexism_labels": {
                 "task_type": "classification",
-                "column_idx": 6
+                "column_idx": 6,
+                "metric":"acc"
             }
         }
     },
@@ -17,7 +18,8 @@
         "tasks":{
             "toxicity_labels": {
                 "task_type": "classification",
-                "column_idx": 20
+                "column_idx": 20,
+                "metric":"f1"
             }
         }
     }
