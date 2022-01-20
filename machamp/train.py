@@ -76,15 +76,16 @@ def train(name, resume, dataset_configs, device, parameters_config, finetune):
     util.clean_th_files(serialization_dir)
     return serialization_dir
 
+device = int(args.device)
 name = args.name
 if name == '':
     names = [name[name.rfind('/')+1: name.rfind('.') if '.' in name else len(name)] for name in args.dataset_configs]
     name = '.'.join(names)
 
 if args.sequential:
-    oldDir = train(name + '.0', args.resume, args.dataset_configs[0], args.device, args.parameters_config, args.finetune)
+    oldDir = train(name + '.0', args.resume, args.dataset_configs[0], device, args.parameters_config, args.finetune)
     for datasetIdx, dataset in enumerate(args.dataset_configs[1:]):
-        oldDir = train(name + '.' + str(datasetIdx+1), False, dataset, args.device, args.parameters_config, oldDir)
+        oldDir = train(name + '.' + str(datasetIdx+1), False, dataset, device, args.parameters_config, oldDir)
 else:
-    train(name, args.resume, args.dataset_configs, args.device, args.parameters_config, args.finetune)
+    train(name, args.resume, args.dataset_configs, device, args.parameters_config, args.finetune)
 

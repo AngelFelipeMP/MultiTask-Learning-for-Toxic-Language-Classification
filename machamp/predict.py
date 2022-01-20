@@ -38,9 +38,10 @@ if not os.path.isfile(archive_dir / "weights.th"):
 config_file = archive_dir / "config.json"
 
 params = Params.from_file(config_file)
+device = int(args.device)
 
-if args.device is not None:
-    params['trainer']['cuda_device'] = args.device
+if device is not None:
+    params['trainer']['cuda_device'] = device
 params['dataset_reader']['is_raw'] = args.raw_text
 
 if args.dataset is None and len(params['dataset_reader']['datasets']) > 1:
