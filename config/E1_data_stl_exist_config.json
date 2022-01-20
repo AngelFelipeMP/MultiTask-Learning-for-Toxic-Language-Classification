@@ -1,0 +1,14 @@
+{
+    "EXIST": {
+        "train_data_path": "/content/data/EXIST2021_training_processed_[TRAIN].tsv",
+        "validation_data_path": "/content/data/EXIST2021_training_processed_[VAL].tsv",
+        "sent_idxs": [5],
+        "tasks":{
+            "sexism_labels": {
+                "task_type": "classification",
+                "column_idx": 6,
+                "metric":"acc"
+            }
+        }
+    }
+}
