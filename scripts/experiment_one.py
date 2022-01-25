@@ -17,14 +17,18 @@ parameter_config = config_path + '_parameter_'
 
 # if __name__ == '__main__':
 
+# install dependencies
+os.system('pip3 install --user -r ' + repo_path + '/machamp/requirements.txt')
+
 # grab data from drive
 data_acquisition(source_data_path, data_path, ['EXIST','DETOXIS'])
 
+# process data for machamp standards
 stratify_head_detoxis = process_data(data_path, 'DETOXIS', 'comment', 'toxicity')
 stratify_head_exist = process_data(data_path, 'EXIST', 'text', 'task1')
 
-print(stratify_head_exist)
-print(stratify_head_detoxis)
+# print(stratify_head_exist)
+# print(stratify_head_detoxis)
 
 # for fold in range(folds_number):
 #     split_data(data_path, fold, 0.2, stratify_head_detoxis)

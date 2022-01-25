@@ -1,7 +1,5 @@
 import os
 import shutil
-import csv
-from xmlrpc.client import boolean
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -28,6 +26,7 @@ def file_list(path, word_in):
     file_list = [file_name for file_name in file_list if word_in in file_name]
     print(f'List of {word_in} files/csv/tsv {file_list}')
     return file_list
+
 
 # def process_data(file_names, path, text_column, label_column, split_test):
 def process_data(path, dataset_name, text_column, label_column):
