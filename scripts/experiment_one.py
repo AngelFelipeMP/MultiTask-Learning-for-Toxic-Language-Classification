@@ -27,8 +27,25 @@ data_acquisition(source_data_path, data_path, ['EXIST','DETOXIS'])
 stratify_head_detoxis = process_data(data_path, 'DETOXIS', 'comment', 'toxicity')
 stratify_head_exist = process_data(data_path, 'EXIST', 'text', 'task1')
 
-# print(stratify_head_exist)
-# print(stratify_head_detoxis)
+# # ! merge train + validation Here (it may be process_data func )
+# df_train =
+# df_ test =
+
+# skf = StratifiedKFold(n_fold_number)
+# for train_index, test_index in skf.split(X, y):
+# # y = stratify_head_detoxis
+
+# split_data(data_path, train_index, test_index, 0.2, stratify_head_detoxis)
+# split_data(data_path, train_index, test_index, 0.2, stratify_head_exist)
+
+# change_parameter_seeds(parameter_config + 'config.json')
+# for model in models:
+#     output_path = experiment + '/' + model 
+#     train(
+#         dataset_config + model + '_config.json',
+#         device,
+#         output_path,
+#         parameter_config + 'config.json')
 
 # for fold in range(folds_number):
 #     split_data(data_path, fold, 0.2, stratify_head_detoxis)
@@ -48,7 +65,6 @@ stratify_head_exist = process_data(data_path, 'EXIST', 'text', 'task1')
 ## //TODO
 # write the data_split script fuction (utils.py)
 # write the change_parameter_seeds fuction (utils.py)
-# debug process_data
 # debug split_data
 # add randon seed split data
 ##### write the fuctions by hand first !!!!!! ########

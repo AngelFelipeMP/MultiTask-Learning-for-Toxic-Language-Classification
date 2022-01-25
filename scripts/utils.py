@@ -1,7 +1,7 @@
 import os
 import shutil
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold
 
 def data_acquisition(source_path=str(), target_folder=str(), datasets=list()):
     # create a data folder
@@ -21,17 +21,17 @@ def data_acquisition(source_path=str(), target_folder=str(), datasets=list()):
                 print('copied', file_name)
     
 
-def file_list(path, word_in):
+def file_list(path=str(), word_in=str()):
     file_list = os.listdir(path)
     file_list = [file_name for file_name in file_list if word_in in file_name]
     print(f'List of {word_in} files/csv/tsv {file_list}')
     return file_list
 
 
-# def process_data(file_names, path, text_column, label_column, split_test):
-def process_data(path, dataset_name, text_column, label_column):
+def process_data(path=str(), dataset_name=str(), text_column=str(), label_column=str()):
     file_names = file_list(path, dataset_name)
     dataset_info = dict()
+    merge_list = list()
     
     datasets = {'.csv':[name for name in file_names if '.csv' in name],
                 '.tsv':[name for name in file_names if '.tsv' in name]}
@@ -48,16 +48,30 @@ def process_data(path, dataset_name, text_column, label_column):
             head = None if type(df.columns.to_list()[0]) != int else True
             
             # save as .tsv
-            df.to_csv(path + '/' + data[:-4] + '_processed' + '.tsv', sep="\t")
+            data_path_name = path + '/' + data[:-4] + '_processed' + '.tsv'
+            df = df.reset_index(drop=True)
+            df.to_csv(data_path_name, sep="\t")
+            
+            # save data train/test to concat
+            if v and ('label' in data or 'train' in data):
+                merge_list.append(df)
             
             # save columns to using in the data split for stratification and header None/True
             dataset_info[data[:-4] + '_processed' + '.tsv'] = [columns_stratify, head]
             
+        # concat train and test
+        if merge_list:
+            df = pd.concat(merge_list, ignore_index=True)
+            df.reset_index(drop=True).to_csv(path + '/' + data.split('_')[0] + '_merge' + '_processed' + '.tsv', sep="\t")
+                
     return dataset_info
             
 
 
 def split_data(data_path=str(), fold_number=int(), test_size=float(), dataset_info=dict()):
+    # get rundom_state -> fold_number
+    # merge train and test
+
     
     for name, info in dataset_info.items():
         df = pd.read_csv(data_path + '/' + name, sep="\t")
