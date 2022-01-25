@@ -24,10 +24,10 @@ def data_acquisition(source_path=str(), target_folder=str(), datasets=list()):
     
 
 def file_list(path, word_in):
-    csv_list = os.listdir(path)
-    csv_list = [x for x in csv_list if word_in in x]
-    print(f'List of {word_in} files/csv {csv_list}')
-    return csv_list
+    file_list = os.listdir(path)
+    file_list = [file_name for file_name in file_list if word_in in file_name]
+    print(f'List of {word_in} files/csv/tsv {file_list}')
+    return file_list
 
 # def process_data(file_names, path, text_column, label_column, split_test):
 def process_data(path, dataset_name, text_column, label_column):
