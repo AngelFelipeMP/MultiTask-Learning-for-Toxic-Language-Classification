@@ -1,7 +1,6 @@
 import os
 import shutil
 import pandas as pd
-from sklearn.model_selection import StratifiedKFold
 
 def data_acquisition(source_path=str(), target_folder=str(), datasets=list()):
     # create a data folder
@@ -19,13 +18,15 @@ def data_acquisition(source_path=str(), target_folder=str(), datasets=list()):
             if os.path.isfile(source):
                 shutil.copy(source, destination)
                 print('copied', file_name)
-    
+
+
 
 def file_list(path=str(), word_in=str()):
     file_list = os.listdir(path)
     file_list = [file_name for file_name in file_list if word_in in file_name]
     print(f'List of {word_in} files/csv/tsv {file_list}')
     return file_list
+
 
 
 def process_data(path=str(), dataset_name=str(), text_column=str(), label_column=str()):
@@ -44,35 +45,28 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
             #remove some "\t" and "\n"
             df[text_column] = df.loc[:,text_column].apply(lambda x: x.replace('\n', ' '))
             df[text_column] = df.loc[:,text_column].apply(lambda x: x.replace('\t', ' '))
-            columns_stratify = [label_column, 'language'] if 'language' in df.columns.to_list() else [label_column]
             head = None if type(df.columns.to_list()[0]) != int else True
             
             # save as .tsv
             data_path_name = path + '/' + data[:-4] + '_processed' + '.tsv'
             df = df.reset_index(drop=True)
-            df.to_csv(data_path_name, sep="\t")
+            df.to_csv(data_path_name, header=head, sep="\t")
             
             # save data train/test to concat
-            if v and ('label' in data or 'train' in data):
+            if len(v) > 1 and ('label' in data or 'train' in data):
                 merge_list.append(df)
-            
-            # save columns to using in the data split for stratification and header None/True
-            dataset_info[data[:-4] + '_processed' + '.tsv'] = [columns_stratify, head]
-            
+                        
         # concat train and test
         if merge_list:
             df = pd.concat(merge_list, ignore_index=True)
-            df.reset_index(drop=True).to_csv(path + '/' + data.split('_')[0] + '_merge' + '_processed' + '.tsv', sep="\t")
-                
-    return dataset_info
-            
+            df.reset_index(drop=True).to_csv(path + '/' + data.split('_')[0] + '_merge' + '_processed' + '.tsv', header=head, sep="\t")
 
 
 def split_data(data_path=str(), fold_number=int(), test_size=float(), dataset_info=dict()):
     # get rundom_state -> fold_number
     # merge train and test
+    # TODO -> finish to white the func
 
-    
     for name, info in dataset_info.items():
         df = pd.read_csv(data_path + '/' + name, sep="\t")
             
@@ -84,9 +78,13 @@ def split_data(data_path=str(), fold_number=int(), test_size=float(), dataset_in
         elif 'test' in name and 'label' in name:
             df.to_csv(path + '/' + name[:-4] + '_[TEST]' + '.tsv', header=info[1], sep="\t")
 
+
+
 def change_parameter_seeds(args):
     #### construction
     return
+
+
 
 def train(dataset_config=str(), device=int(), output_path=str(), parameter_config=str()):
     code_line = 'python3 train.py --dataset_config ' + dataset_config
@@ -95,6 +93,8 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
     code_line = code_line + ' --parameters_config ' + parameter_config
     
     os.system(code_line)
+
+
 
 def average(folds_number=int(), log_path=str(), models=list()):
     ''' Average cross validation results and copy all results to local repo '''
