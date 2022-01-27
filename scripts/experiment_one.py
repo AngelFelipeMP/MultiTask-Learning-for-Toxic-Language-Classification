@@ -31,18 +31,32 @@ data_acquisition(source_data_path, data_path, ['EXIST','DETOXIS'])
 process_data(data_path, 'DETOXIS', 'comment', 'toxicity')
 process_data(data_path, 'EXIST', 'text', 'task1')
 
+#TODO comment the code below
+#TODO check if the code are smaller as possible
+#TODO check if it is batter create a function 
 # create skf object to stratify the data split
-df_detoxis = pd.read_csv(data_path + '/' + 'DETOXIS2021_merge_processed.tsv', header=None, index_col=0, sep="\t").reset_index(drop=True)
-df_exist = pd.read_csv(data_path + '/' + 'EXIST2021_merge_processed.tsv', header=None, index_col=0, sep="\t").reset_index(drop=True)
+detoxis_file = 'DETOXIS2021_merge_processed.tsv'
+exist_file = 'EXIST2021_merge_processed.tsv'
+#TODO get the dataset name from process_data func
+df_detoxis = pd.read_csv(data_path + '/' + detoxis_file, header=None, index_col=0, sep="\t").reset_index(drop=True)
+df_exist = pd.read_csv(data_path + '/' + exist_file, header=None, index_col=0, sep="\t").reset_index(drop=True)
 
 kfold = StratifiedKFold(n_splits=folds_number, random_state=42, shuffle=True)
 strat_kfold = MultilabelStratifiedKFold(n_splits=folds_number, random_state=42, shuffle=True)
 
 for data_exist, data_detoxis in zip(strat_kfold.split(np.zeros(len(df_exist)), df_exist.iloc[:,[3,5]]), kfold.split(np.zeros(len(df_detoxis)), df_detoxis.iloc[:,[19]])):
-    train_index_exist, test_index_exist = data_exist 
-    train_index_detoxis, test_index_detoxis = data_detoxis
-
     
+    df_detoxis.iloc[data_detoxis[0]].reset_index(drop=True).to_csv(data_path + '/' + detoxis_file.split('_')[0] + '_processed' + '_[TRAIN]' + '.tsv', header=None, sep="\t") 
+    df_detoxis.iloc[data_detoxis[1]].reset_index(drop=True).to_csv(data_path + '/' + detoxis_file.split('_')[0] + '_processed' + '_[VAL]' + '.tsv', header=None, sep="\t")
+    
+    df_exist.iloc[data_exist[0]].reset_index(drop=True).to_csv(data_path + '/' + exist_file.split('_')[0] + '_processed' + '_[TRAIN]' + '.tsv', header=None, sep="\t") 
+    df_exist.iloc[data_exist[1]].reset_index(drop=True).to_csv(data_path + '/' + exist_file.split('_')[0] + '_processed' + '_[VAL]' + '.tsv', header=None, sep="\t")
+
+    print(data_exist)
+    print(data_detoxis)
+    print('#######################')
+    
+    #TODO add the below part to the code
     # split_data(data_path, train_index, test_index, 0.2, stratify_head_exist)
 
     # change_parameter_seeds(parameter_config + 'config.json')
@@ -55,13 +69,5 @@ for data_exist, data_detoxis in zip(strat_kfold.split(np.zeros(len(df_exist)), d
     #         parameter_config + 'config.json')
 
 
-
+#TODO add the avg func
 # average(folds_number, repo_path + '/machamp/logs/' + experiment, models)
-# # TODO -> write avg func
-
-
-
-#TODO
-# write the data_split script fuction (utils.py)
-# write the change_parameter_seeds fuction (utils.py)
-# debug split_data

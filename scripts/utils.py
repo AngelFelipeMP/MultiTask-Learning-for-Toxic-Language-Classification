@@ -60,12 +60,13 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
         if merge_list:
             df = pd.concat(merge_list, ignore_index=True)
             df.reset_index(drop=True).to_csv(path + '/' + data.split('_')[0] + '_merge' + '_processed' + '.tsv', header=head, sep="\t")
+    #TODO return the merged dataset name str()
 
 
 def split_data(data_path=str(), fold_number=int(), test_size=float(), dataset_info=dict()):
     # get rundom_state -> fold_number
     # merge train and test
-    # TODO -> finish to white the func
+    # TODO -> check if necessary split_data func
 
     for name, info in dataset_info.items():
         df = pd.read_csv(data_path + '/' + name, sep="\t")
@@ -81,6 +82,7 @@ def split_data(data_path=str(), fold_number=int(), test_size=float(), dataset_in
 
 
 def change_parameter_seeds(args):
+    #COMMENT it may not necessarily 
     #### construction
     return
 
@@ -97,6 +99,7 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
 
 
 def average(folds_number=int(), log_path=str(), models=list()):
+    # TODO -> write avg func
     ''' Average cross validation results and copy all results to local repo '''
     #### construction
     return
