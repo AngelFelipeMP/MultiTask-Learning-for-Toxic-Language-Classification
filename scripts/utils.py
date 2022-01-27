@@ -31,8 +31,8 @@ def file_list(path=str(), word_in=str()):
 
 def process_data(path=str(), dataset_name=str(), text_column=str(), label_column=str()):
     file_names = file_list(path, dataset_name)
-    dataset_info = dict()
     merge_list = list()
+    stratify_index = list()
     
     datasets = {'.csv':[name for name in file_names if '.csv' in name],
                 '.tsv':[name for name in file_names if '.tsv' in name]}
@@ -53,14 +53,25 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
             df.to_csv(data_path_name, header=head, sep="\t")
             
             # save data train/test to concat
-            if len(v) > 1 and ('label' in data or 'train' in data):
+            if 'label' in data or 'train' in data:
                 merge_list.append(df)
                         
-        # concat train and test
-        if merge_list:
-            df = pd.concat(merge_list, ignore_index=True)
-            df.reset_index(drop=True).to_csv(path + '/' + data.split('_')[0] + '_merge' + '_processed' + '.tsv', header=head, sep="\t")
-    #TODO return the merged dataset name str()
+    # concat train and test
+    if merge_list:
+        df = pd.concat(merge_list, ignore_index=True)
+        df_merged_name = data.split('_')[0] + '_merge' + '_processed' + '.tsv'
+        df.reset_index(drop=True).to_csv(path + '/' + df_merged_name, header=head, sep="\t")
+
+    # Get df column index for extratification
+    if 'language' in df.columns.to_list():
+        stratify_index.append(df.columns.to_list().index('language'))
+        stratify_index.append(df.columns.to_list().index(label_column))
+    else:
+        stratify_index.append(df.columns.to_list().index(label_column))
+            
+        # columns_stratify = [df.columns.to_list().index(label_column), df.columns.to_list().index('language')] if 'language' in df.columns.to_list() else [df.columns.to_list().index(label_column)]
+    
+    return df_merged_name, stratify_index
 
 
 def split_data(data_path=str(), fold_number=int(), test_size=float(), dataset_info=dict()):
