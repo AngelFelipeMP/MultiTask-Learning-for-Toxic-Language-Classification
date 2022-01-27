@@ -68,34 +68,8 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
         stratify_index.append(df.columns.to_list().index(label_column))
     else:
         stratify_index.append(df.columns.to_list().index(label_column))
-            
-        # columns_stratify = [df.columns.to_list().index(label_column), df.columns.to_list().index('language')] if 'language' in df.columns.to_list() else [df.columns.to_list().index(label_column)]
-    
+
     return df_merged_name, stratify_index
-
-
-def split_data(data_path=str(), fold_number=int(), test_size=float(), dataset_info=dict()):
-    # get rundom_state -> fold_number
-    # merge train and test
-    # TODO -> check if necessary split_data func
-
-    for name, info in dataset_info.items():
-        df = pd.read_csv(data_path + '/' + name, sep="\t")
-            
-        if 'train' in name:
-            train, val = train_test_split(df, test_size = 0.2, stratify=df.loc[:, info[0][0]], random_state=42)
-            train.reset_index(drop=True).to_csv(path + '/' + name[:-4] + '_[TRAIN]' + '.tsv', header=info[1], sep="\t")
-            val.reset_index(drop=True).to_csv(path + '/' + name[:-4] + '_[VAL]' + '.tsv', header=info[1], sep="\t")
-            
-        elif 'test' in name and 'label' in name:
-            df.to_csv(path + '/' + name[:-4] + '_[TEST]' + '.tsv', header=info[1], sep="\t")
-
-
-
-def change_parameter_seeds(args):
-    #COMMENT it may not necessarily 
-    #### construction
-    return
 
 
 
