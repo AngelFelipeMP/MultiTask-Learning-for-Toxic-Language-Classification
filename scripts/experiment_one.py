@@ -1,11 +1,5 @@
-from utils import process_data, data_acquisition, train
-import os
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import StratifiedKFold
-from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
-
-folds_number = 2
+# inputs
+folds_number = 2 #at least 2 (Train/val)
 experiment = 'E1'
 device = 0  #gpu 0 / cpu 1
 source_data_path = '/content/drive/MyDrive/Code/MTL_2021/Data'
@@ -20,16 +14,24 @@ parameter_config = config_path + '_parameter_'
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
             'EXIST':{'text':'text','label':'task1'}}
 
+# install dependencies & import
+import os
+# os.system('pip install --user -r ' + repo_path + '/requirements.txt')
+os.system('pip install -v -q iterative-stratification')
+os.system('pip3 install --user -r ' + repo_path + '/machamp/requirements.txt')
+import time
+from utils import process_data, data_acquisition, train
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import StratifiedKFold
+from iterstrat.ml_stratifiers import MultilabelStratifiedKFold 
 
 # if __name__ == '__main__':
-
-# install dependencies
-os.system('pip3 install --user -r ' + repo_path + '/machamp/requirements.txt')
 
 # grab data from drive
 data_acquisition(source_data_path, data_path, tasks.keys())
 
-# create objs to create the k folds 
+# create objs to create the k folds
 simple_kfold = StratifiedKFold(n_splits=folds_number, random_state=42, shuffle=True)
 multi_label_kfold = MultilabelStratifiedKFold(n_splits=folds_number, random_state=42, shuffle=True)
 

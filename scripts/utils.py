@@ -79,7 +79,8 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
     code_line = code_line + ' --name ' + output_path
     code_line = code_line + ' --parameters_config ' + parameter_config
     
-    os.system(code_line)
+    print(code_line)
+    # os.system(code_line)
 
 
 
