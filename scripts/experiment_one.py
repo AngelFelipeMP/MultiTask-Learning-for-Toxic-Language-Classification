@@ -11,6 +11,7 @@ config_path = repo_path + '/config/' + experiment + '/' + experiment
 dataset_config = config_path + '_data_'
 parameter_config = config_path + '_parameter_'
 
+#TEST !!!!
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
             'EXIST':{'text':'text','label':'task1'}}
 
