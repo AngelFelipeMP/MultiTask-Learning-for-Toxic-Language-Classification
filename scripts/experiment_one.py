@@ -37,7 +37,6 @@ simple_kfold = StratifiedKFold(n_splits=folds_number, random_state=42, shuffle=T
 multi_label_kfold = MultilabelStratifiedKFold(n_splits=folds_number, random_state=42, shuffle=True)
 
 #TODO test the code
-#TODO may comment the code abouve
 # process data for machamp standards & add info to data/taks dictionary
 for task in tasks.keys():
     file, stratify_col = process_data(data_path, task, tasks[task]['text'], tasks[task]['label'])
