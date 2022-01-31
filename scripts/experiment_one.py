@@ -7,11 +7,11 @@ data_path = '/content/data'
 path = '/content' #main path
 repo_path = path + '/MultiTask-Learning-for-Toxic-Language-Classification'
 results_path = path + '/E1_results'
-config_path = repo_path + '/config/' + experiment + '/' + experiment
-dataset_config = config_path + '_data_'
-parameter_config = config_path + '_parameter_'
+config_path = repo_path + '/config/' + experiment
+dataset_config = config_path + '/' + experiment + '_data_'
+parameter_config = config_path + '/' + experiment + '_parameter_'
 
-#TEST !!!!
+tasks = get_task(experiment, config_path)
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
             'EXIST':{'text':'text','label':'task1'}}
 

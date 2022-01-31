@@ -1,6 +1,7 @@
 import os
 import shutil
 import pandas as pd
+import json
 
 def data_acquisition(source_path=str(), target_folder=str(), datasets=list()):
     # create a data folder
@@ -81,7 +82,36 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
     
     os.system(code_line)
 
+tasks = get_task(experiment, config_path)
+tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
+            'EXIST':{'text':'text','label':'task1'}}
 
+## TODO finish function
+def get_tasks(experiment=str(), path=str(), data_path=str()):
+    dataset (path=str(), word_in=str()):
+    file = file_list(path, 'mtl')[0]
+    tasks = dict()
+
+    with open(path + '/' + file, 'r') as f:
+        conf_dict = f.read()
+        
+    js = conf_dict.loads()
+    
+    for task, info in js.items():
+        tasks[task] = dict()
+        tasks[task]['sent_idxs'] = info['sent_idxs'][0]
+        tasks[task]['column_idx'] = info['tasks']['column_idx']
+        
+        
+        
+        for k,v in  info.items():
+            tasks[task][]
+    
+    "sent_idxs"
+     "tasks"
+        "column_idx"
+    
+    return tasks
 
 def average(folds_number=int(), log_path=str(), models=list()):
     # TODO -> write avg func
