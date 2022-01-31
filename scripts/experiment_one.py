@@ -4,10 +4,10 @@ experiment = 'E1'
 device = 0  #gpu 0 / cpu 1
 source_data_path = '/content/drive/MyDrive/Code/MTL_2021/Data'
 data_path = '/content/data'
-path = '/content/drive/MyDrive/Code/MTL_2021/machamp/experiment_one'
+path = '/content' #main path
 repo_path = path + '/MultiTask-Learning-for-Toxic-Language-Classification'
 results_path = path + '/E1_results'
-config_path = repo_path + '/config/' + experiment
+config_path = repo_path + '/config/' + experiment + '/' + experiment
 dataset_config = config_path + '_data_'
 parameter_config = config_path + '_parameter_'
 
