@@ -86,7 +86,7 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
 # TODO finish function
 def get_tasks(experiment=str(), path=str(), data_path=str()):
     datasets = file_list(data_path, 'train')
-    datasets = [dataset if 'processed' not in dataset for dataset in datasets]
+    datasets = [dataset for dataset in datasets if 'processed' not in dataset]
     print(datasets)
     print('##################################')
     
@@ -103,7 +103,7 @@ def get_tasks(experiment=str(), path=str(), data_path=str()):
         tasks[task] = dict()
         tasks[task]['sent_idxs'] = info['sent_idxs'][0]
         tasks[task]['column_idx'] = info['tasks']['column_idx']
-        tasks[task]['train'] = [dataset if task in dataset for dataset in datasets][0]
+        tasks[task]['train'] = [dataset for dataset in datasets if task in dataset][0]
         tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
         
         df = pd.read_csv(data_path + '/' + tasks[task]['train'], sep=tasks[task]['split'])

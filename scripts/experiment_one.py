@@ -11,6 +11,7 @@ config_path = repo_path + '/config/' + experiment
 dataset_config = config_path + '/' + experiment + '_data_'
 parameter_config = config_path + '/' + experiment + '_parameter_'
 
+from utils import process_data, data_acquisition, train, get_task
 get_task(experiment, config_path, data_path)
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
             'EXIST':{'text':'text','label':'task1'}}
@@ -21,7 +22,6 @@ import os
 os.system('pip install -v -q iterative-stratification')
 os.system('pip3 install --user -r ' + repo_path + '/machamp/requirements.txt')
 import time
-from utils import process_data, data_acquisition, train
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
