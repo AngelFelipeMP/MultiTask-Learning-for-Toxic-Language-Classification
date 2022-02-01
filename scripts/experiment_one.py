@@ -1,10 +1,24 @@
+#TODO Criate a config file to add out the path stuff
+# # inputs
+# folds_number = 2 #at least 2 (Train/val)
+# experiment = 'E1'
+# device = 0  #gpu 0 / cpu -1
+# source_data_path = '/content/drive/MyDrive/Code/MTL_2021/Data'
+# data_path = '/content/data'
+# path = '/content' #main path
+# repo_path = path + '/MultiTask-Learning-for-Toxic-Language-Classification'
+# results_path = path + '/E1_results'
+# config_path = repo_path + '/config/' + experiment
+# dataset_config = config_path + '/' + experiment + '_data_'
+# parameter_config = config_path + '/' + experiment + '_parameter_'
+
 # inputs
 folds_number = 2 #at least 2 (Train/val)
 experiment = 'E1'
-device = 0  #gpu 0 / cpu 1
-source_data_path = '/content/drive/MyDrive/Code/MTL_2021/Data'
-data_path = '/content/data'
-path = '/content' #main path
+device = -1  #gpu 0 / cpu -1
+source_data_path = '/home/angel/uspdrive/Code/MTL_2021/Data'
+data_path = '/home/angel/repos/mtl/data'
+path = '/home/angel/repos/mtl' #main path
 repo_path = path + '/MultiTask-Learning-for-Toxic-Language-Classification'
 results_path = path + '/E1_results'
 config_path = repo_path + '/config/' + experiment
@@ -12,6 +26,12 @@ dataset_config = config_path + '/' + experiment + '_data_'
 parameter_config = config_path + '/' + experiment + '_parameter_'
 
 from utils import process_data, data_acquisition, train, get_tasks
+
+# grab data from drive
+data_acquisition(config_path, source_data_path, data_path)
+
+
+
 get_tasks(experiment, config_path, data_path)
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
             'EXIST':{'text':'text','label':'task1'}}
@@ -21,17 +41,14 @@ tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
 import os
 # os.system('pip install --user -r ' + repo_path + '/requirements.txt')
 os.system('pip install -v -q iterative-stratification')
-os.system('pip3 install --user -r ' + repo_path + '/machamp/requirements.txt')
+os.system('pip install --user -r ' + repo_path + '/machamp/requirements.txt')
+# os.system('conda install ' + repo_path + '/machamp/requirements.txt')
 import time
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold 
 
-# if __name__ == '__main__':
-
-# grab data from drive
-data_acquisition(source_data_path, data_path, tasks.keys())
 
 # create objs to create the k folds
 simple_kfold = StratifiedKFold(n_splits=folds_number, random_state=42, shuffle=True)

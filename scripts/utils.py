@@ -3,7 +3,16 @@ import shutil
 import pandas as pd
 import json
 
-def data_acquisition(source_path=str(), target_folder=str(), datasets=list()):
+def data_acquisition(config_path=str(), source_path=str(), target_folder=str()):
+    
+    # get task/dataset names
+    print(config_path)
+    file = file_list(config_path, 'mtl')[0]
+    with open(config_path + '/' + file, 'r') as f:
+        conf_dict = f.read()
+    js = json.loads(conf_dict)
+    datasets = list(js.keys())
+    
     # create a data folder
     if os.path.exists(target_folder):
         shutil.rmtree(target_folder)
@@ -81,7 +90,7 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
     code_line = code_line + ' --parameters_config ' + parameter_config
     
     print(code_line)
-    # os.system(code_line)
+    os.system(code_line)
 
 # TODO finish function
 def get_tasks(experiment=str(), path=str(), data_path=str()):
