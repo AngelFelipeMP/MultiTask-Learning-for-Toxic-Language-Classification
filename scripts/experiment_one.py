@@ -11,8 +11,8 @@ config_path = repo_path + '/config/' + experiment
 dataset_config = config_path + '/' + experiment + '_data_'
 parameter_config = config_path + '/' + experiment + '_parameter_'
 
-from utils import process_data, data_acquisition, train, get_task
-get_task(experiment, config_path, data_path)
+from utils import process_data, data_acquisition, train, get_tasks
+get_tasks(experiment, config_path, data_path)
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
             'EXIST':{'text':'text','label':'task1'}}
 

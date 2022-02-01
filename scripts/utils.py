@@ -96,13 +96,14 @@ def get_tasks(experiment=str(), path=str(), data_path=str()):
     with open(path + '/' + file, 'r') as f:
         conf_dict = f.read()
         
-    js = conf_dict.loads()
+    js = json.loads(conf_dict)
+    
     print(js)
     print('##################################')
     for task, info in js.items():
         tasks[task] = dict()
         tasks[task]['sent_idxs'] = info['sent_idxs'][0]
-        tasks[task]['column_idx'] = info['tasks']['column_idx']
+        tasks[task]['column_idx'] = info['tasks'].values()[0]['column_idx']
         tasks[task]['train'] = [dataset for dataset in datasets if task in dataset][0]
         tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
         
