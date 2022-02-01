@@ -62,7 +62,7 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
         df = pd.concat(merge_list, ignore_index=True)
         df_merged_name = data.split('_')[0] + '_merge' + '_processed' + '.tsv'
         df.reset_index(drop=True).to_csv(path + '/' + df_merged_name, header=head, sep="\t")
-
+#COMMENT I may can remove it (BELOW)
     # Get df column index for extratification
     if 'language' in df.columns.to_list():
         stratify_index.append(df.columns.to_list().index('language'))
@@ -80,15 +80,16 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
     code_line = code_line + ' --name ' + output_path
     code_line = code_line + ' --parameters_config ' + parameter_config
     
-    os.system(code_line)
+    print(code_line)
+    # os.system(code_line)
 
-tasks = get_task(experiment, config_path)
-tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
-            'EXIST':{'text':'text','label':'task1'}}
-
-## TODO finish function
+# TODO finish function
 def get_tasks(experiment=str(), path=str(), data_path=str()):
-    dataset (path=str(), word_in=str()):
+    datasets = file_list(data_path, 'train')
+    datasets = [dataset if 'processed' not in dataset for dataset in datasets]
+    print(datasets)
+    print('##################################')
+    
     file = file_list(path, 'mtl')[0]
     tasks = dict()
 
@@ -96,22 +97,25 @@ def get_tasks(experiment=str(), path=str(), data_path=str()):
         conf_dict = f.read()
         
     js = conf_dict.loads()
-    
+    print(js)
+    print('##################################')
     for task, info in js.items():
         tasks[task] = dict()
         tasks[task]['sent_idxs'] = info['sent_idxs'][0]
         tasks[task]['column_idx'] = info['tasks']['column_idx']
+        tasks[task]['train'] = [dataset if task in dataset for dataset in datasets][0]
+        tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
         
-        
-        
-        for k,v in  info.items():
-            tasks[task][]
+        df = pd.read_csv(data_path + '/' + tasks[task]['train'], sep=tasks[task]['split'])
+        print(df.head())
+        print('##################################')
+        print(tasks[task])
+        print('##################################')
     
-    "sent_idxs"
-     "tasks"
-        "column_idx"
-    
-    return tasks
+    print(js)
+    print('##################################')
+
+    return 
 
 def average(folds_number=int(), log_path=str(), models=list()):
     # TODO -> write avg func

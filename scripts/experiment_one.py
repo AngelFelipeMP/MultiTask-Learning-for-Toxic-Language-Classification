@@ -11,7 +11,7 @@ config_path = repo_path + '/config/' + experiment
 dataset_config = config_path + '/' + experiment + '_data_'
 parameter_config = config_path + '/' + experiment + '_parameter_'
 
-tasks = get_task(experiment, config_path)
+get_task(experiment, config_path, data_path)
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
             'EXIST':{'text':'text','label':'task1'}}
 
