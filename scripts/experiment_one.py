@@ -15,6 +15,7 @@ from utils import process_data, data_acquisition, train, get_tasks
 get_tasks(experiment, config_path, data_path)
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
             'EXIST':{'text':'text','label':'task1'}}
+#TEST
 
 # install dependencies & import
 import os
