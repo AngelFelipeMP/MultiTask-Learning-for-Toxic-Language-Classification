@@ -2,8 +2,9 @@
 # install to run MaChAmp is allennlp==1.3. The other ones are just specified
 # here for reproducibility.
 
-
+iterative-stratification==0.1.7
 allennlp==1.3
 transformers==4.0.0
 torch==1.7.1
 networkx
+pandas==1.3.5
