@@ -1,3 +1,4 @@
+#TODO do soming to redus data/datasets in order to speed testes
 #TODO Criate a config file to add out the path stuff
 # # inputs
 # folds_number = 2 #at least 2 (Train/val)
@@ -12,13 +13,26 @@
 # dataset_config = config_path + '/' + experiment + '_data_'
 # parameter_config = config_path + '/' + experiment + '_parameter_'
 
+# # inputs
+# folds_number = 2 #at least 2 (Train/val)
+# experiment = 'E1'
+# device = -1  #gpu 0 / cpu -1
+# source_data_path = '/home/angel/uspdrive/Code/MTL_2021/Data'
+# data_path = '/home/angel/repos/mtl/data'
+# path = '/home/angel/repos/mtl' #main path
+# repo_path = path + '/MultiTask-Learning-for-Toxic-Language-Classification'
+# results_path = path + '/E1_results'
+# config_path = repo_path + '/config/' + experiment
+# dataset_config = config_path + '/' + experiment + '_data_'
+# parameter_config = config_path + '/' + experiment + '_parameter_'
+
 # inputs
 folds_number = 2 #at least 2 (Train/val)
 experiment = 'E1'
 device = -1  #gpu 0 / cpu -1
-source_data_path = '/home/angel/uspdrive/Code/MTL_2021/Data'
-data_path = '/home/angel/repos/mtl/data'
-path = '/home/angel/repos/mtl' #main path
+source_data_path = '/Users/angel_de_paula/angel.magnossao@alumni.usp.br - Google Drive/My Drive/Code/MTL_2021/Data'
+data_path = '/Users/angel_de_paula/repos/mtl/data'
+path = '/Users/angel_de_paula/repos/mtl' #main path
 repo_path = path + '/MultiTask-Learning-for-Toxic-Language-Classification'
 results_path = path + '/E1_results'
 config_path = repo_path + '/config/' + experiment
@@ -27,6 +41,7 @@ parameter_config = config_path + '/' + experiment + '_parameter_'
 
 from utils import process_data, data_acquisition, train, get_tasks
 
+# TODO Change data_aquisition to download data from drive
 # grab data from drive
 data_acquisition(config_path, source_data_path, data_path)
 
@@ -81,7 +96,8 @@ for idxs in zip(*[tasks[data]['kfold'] for data in split_sequence]):
             output_path,
             parameter_config + 'config.json')
 
-
+# TODO group all functions in a class
 
 #TODO add the avg func
 # average(folds_number, repo_path + '/machamp/logs/' + experiment, models)
+
