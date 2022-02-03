@@ -50,7 +50,8 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
     for k,v in datasets.items():
         divide_columns = ',' if k == '.csv' else '\t'
         for data in v:
-            df = pd.read_csv(path + '/' + data, sep=divide_columns)
+            #COMMENT add "nrows" for  the BUG purpose
+            df = pd.read_csv(path + '/' + data, sep=divide_columns, nrows=32)
             
             #remove some "\t" and "\n"
             df[text_column] = df.loc[:,text_column].apply(lambda x: x.replace('\n', ' '))

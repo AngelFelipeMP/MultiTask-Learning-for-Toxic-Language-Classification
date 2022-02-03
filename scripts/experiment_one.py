@@ -39,13 +39,12 @@ config_path = repo_path + '/config/' + experiment
 dataset_config = config_path + '/' + experiment + '_data_'
 parameter_config = config_path + '/' + experiment + '_parameter_'
 
+from ast import Break
 from utils import process_data, data_acquisition, train, get_tasks
 
 # TODO Change data_aquisition to download data from drive
 # grab data from drive
 data_acquisition(config_path, source_data_path, data_path)
-
-
 
 get_tasks(experiment, config_path, data_path)
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
@@ -54,10 +53,6 @@ tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
 
 # install dependencies & import
 import os
-# os.system('pip install --user -r ' + repo_path + '/requirements.txt')
-os.system('pip install -v -q iterative-stratification')
-os.system('pip install --user -r ' + repo_path + '/machamp/requirements.txt')
-# os.system('conda install ' + repo_path + '/machamp/requirements.txt')
 import time
 import pandas as pd
 import numpy as np
@@ -95,6 +90,9 @@ for idxs in zip(*[tasks[data]['kfold'] for data in split_sequence]):
             device,
             output_path,
             parameter_config + 'config.json')
+            
+        #COMMENT add "Break" for the BUG purpose
+        break
 
 # TODO group all functions in a class
 
