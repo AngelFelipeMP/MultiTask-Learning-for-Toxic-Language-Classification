@@ -1,4 +1,3 @@
-#TODO do soming to redus data/datasets in order to speed testes
 #TODO Criate a config file to add out the path stuff
 # # inputs
 # folds_number = 2 #at least 2 (Train/val)
@@ -29,10 +28,10 @@
 # inputs
 folds_number = 2 #at least 2 (Train/val)
 experiment = 'E1'
-device = -1  #gpu 0 / cpu -1
+device = None
 source_data_path = '/Users/angel_de_paula/angel.magnossao@alumni.usp.br - Google Drive/My Drive/Code/MTL_2021/Data'
-data_path = '/Users/angel_de_paula/repos/mtl/data'
 path = '/Users/angel_de_paula/repos/mtl' #main path
+data_path = path + '/data'
 repo_path = path + '/MultiTask-Learning-for-Toxic-Language-Classification'
 results_path = path + '/E1_results'
 config_path = repo_path + '/config/' + experiment
@@ -41,6 +40,7 @@ parameter_config = config_path + '/' + experiment + '_parameter_'
 
 from ast import Break
 from utils import process_data, data_acquisition, train, get_tasks
+import torch
 
 # TODO Change data_aquisition to download data from drive
 # grab data from drive
@@ -57,8 +57,11 @@ import time
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
-from iterstrat.ml_stratifiers import MultilabelStratifiedKFold 
+from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 
+#pytorch check for GPU
+if device == str() and device.lower() == 'auto':
+    device = 0 if torch.cuda.is_available() else -1
 
 # create objs to create the k folds
 simple_kfold = StratifiedKFold(n_splits=folds_number, random_state=42, shuffle=True)
@@ -91,10 +94,12 @@ for idxs in zip(*[tasks[data]['kfold'] for data in split_sequence]):
             output_path,
             parameter_config + 'config.json')
             
-        #COMMENT add "Break" for the BUG purpose
+        #DEBUG add "Break" for the BUG purpose
         break
 
 # TODO group all functions in a class
+
+# TODO change debug for a away to test the code outomatic
 
 #TODO add the avg func
 # average(folds_number, repo_path + '/machamp/logs/' + experiment, models)

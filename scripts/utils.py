@@ -50,7 +50,7 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
     for k,v in datasets.items():
         divide_columns = ',' if k == '.csv' else '\t'
         for data in v:
-            #COMMENT add "nrows" for  the BUG purpose
+            #DEBUG add "nrows" for the BUG purpose
             df = pd.read_csv(path + '/' + data, sep=divide_columns, nrows=32)
             
             #remove some "\t" and "\n"
