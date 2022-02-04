@@ -17,21 +17,12 @@ if args.information_config == '':
     logger.error('Specifying --information_config path is required')
     exit(1)
 
-
-#TODO Criate a config file to add out the path stuff
-#TODO Organaze code
-
 # reading info config file
-with open('../config' + '/' + args.information_config, 'r') as f:  # "/E1/E1_information_config.json"
-    conf_dict = f.read()
-info = json.loads(conf_dict)
+with open('../config' + '/' + args.information_config, 'r') as f:
+    conf_info_dict = f.read()
+info = json.loads(conf_info_dict)
 
-#inputs
-# folds_number = 2 #at least 2 (Train/val)
-# experiment = 'E1'
-# source_data_path = '/Users/angel_de_paula/angel.magnossao@alumni.usp.br - Google Drive/My Drive/Code/MTL_2021/Data'
-# path = '/Users/angel_de_paula/repos/mtl' #main path
-
+# base data/config/results path
 path = '/' + '/'.join(os.path.abspath(os.getcwd()).split('/')[1:-2])
 repo_path = '/' + '/'.join(os.path.abspath(os.getcwd()).split('/')[1:-1])
 data_path = path + '/data'
@@ -46,7 +37,8 @@ parameter_config = config_files + '_parameter_'
 # grab data from drive
 data_acquisition(config_path, info['source_data_path'], data_path)
 
-get_tasks(info['experiment'], config_path, data_path)
+# TODO finish get_task func and modify process_data func at the same time
+# tasks = get_tasks(info['experiment'], config_path, data_path)
 tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
             'EXIST':{'text':'text','label':'task1'}}
 
@@ -58,10 +50,10 @@ if info['device'].lower() == 'auto':
 simple_kfold = StratifiedKFold(n_splits=info['folds_number'], random_state=42, shuffle=True)
 multi_label_kfold = MultilabelStratifiedKFold(n_splits=info['folds_number'], random_state=42, shuffle=True)
 
-#TODO test the code
 # process data for machamp standards & add info to data/taks dictionary
 for task in tasks.keys():
-    file, stratify_col = process_data(data_path, task, tasks[task]['text'], tasks[task]['label'])
+    # file, stratify_col = process_data(data_path, task, tasks[task]['text'], tasks[task]['label'])
+    file, stratify_col = process_data(data_path, task, tasks[task]['sent_idxs'], tasks[task]['column_idx'])
     df = pd.read_csv(data_path + '/' + file, header=None, index_col=0, sep="\t").reset_index(drop=True)
     kfold = multi_label_kfold if len(stratify_col) > 1 else simple_kfold
     

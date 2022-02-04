@@ -32,6 +32,7 @@ def data_acquisition(config_path=str(), source_path=str(), target_folder=str()):
 
 
 def file_list(path=str(), word_in=str()):
+    
     file_list = os.listdir(path)
     file_list = [file_name for file_name in file_list if word_in in file_name]
     print(f'List of {word_in} files/csv/tsv {file_list}')
@@ -40,6 +41,7 @@ def file_list(path=str(), word_in=str()):
 
 
 def process_data(path=str(), dataset_name=str(), text_column=str(), label_column=str()):
+    
     file_names = file_list(path, dataset_name)
     merge_list = list()
     stratify_index = list()
@@ -85,6 +87,7 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
 
 
 def train(dataset_config=str(), device=int(), output_path=str(), parameter_config=str()):
+    
     code_line = 'python3 train.py --dataset_config ' + dataset_config
     code_line = code_line + ' --device ' + str(device)
     code_line = code_line + ' --name ' + output_path
@@ -94,26 +97,23 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
     print('\n')
     print(code_line)
     print('\n')
-    os.system(code_line)
+    # os.system(code_line)
 
 # TODO finish function
 def get_tasks(experiment=str(), path=str(), data_path=str()):
-    datasets = file_list(data_path, 'train')
-    datasets = [dataset for dataset in datasets if 'processed' not in dataset]
-    print(datasets)
-    print('##################################')
     
-    file = file_list(path, 'mtl')[0]
+    # get train datasets & mtl config json
+    datasets = file_list(data_path, 'train')
+    config_json = file_list(path, 'mtl')[0]
     tasks = dict()
 
-    with open(path + '/' + file, 'r') as f:
-        conf_dict = f.read()
-        
-    js = json.loads(conf_dict)
+    # open config in python dict
+    with open(path + '/' + config_json, 'r') as f:
+        conf_dict = f.read()        
+    conf_dict = json.loads(conf_dict)
     
-    print(js)
-    print('##################################')
-    for task, info in js.items():
+    # add new information to dict
+    for task, info in conf_dict.items():
         tasks[task] = dict()
         tasks[task]['sent_idxs'] = info['sent_idxs'][0]
         tasks[task]['column_idx'] = list(info['tasks'].values())[0]['column_idx']
@@ -126,10 +126,10 @@ def get_tasks(experiment=str(), path=str(), data_path=str()):
         print(tasks[task])
         print('##################################')
     
-    print(js)
+    print(conf_dict)
     print('##################################')
 
-    return 
+    return tasks
 
 def average(folds_number=int(), log_path=str(), models=list()):
     # TODO -> write avg func
