@@ -4,9 +4,9 @@ import pandas as pd
 import json
 import gdown
 
-#TODO TEST IT
+
 def download_data(urls=dict(), target_folder=str()):
-    #TODO ADD CREATE DATA FOLDER IF IT NOT EXIST
+    
     # create a data folder
     if os.path.exists(target_folder):
         shutil.rmtree(target_folder)
@@ -24,6 +24,7 @@ def download_data(urls=dict(), target_folder=str()):
             
         # delete data folders from current directory
         shutil.rmtree(sorce_folder)
+
 
 
 def data_acquisition(config_path=str(), source_path=str(), target_folder=str()):
@@ -67,7 +68,6 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
     
     file_names = file_list(path, dataset_name)
     merge_list = list()
-    stratify_index = list()
     
     datasets = {'.csv':[name for name in file_names if '.csv' in name],
                 '.tsv':[name for name in file_names if '.tsv' in name]}
@@ -97,15 +97,11 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
         df = pd.concat(merge_list, ignore_index=True)
         df_merged_name = data.split('_')[0] + '_merge' + '_processed' + '.tsv'
         df.reset_index(drop=True).to_csv(path + '/' + df_merged_name, header=head, sep="\t")
-#COMMENT I may can remove it (BELOW)
-    # Get df column index for extratification
-    if 'language' in df.columns.to_list():
-        stratify_index.append(df.columns.to_list().index('language'))
-        stratify_index.append(df.columns.to_list().index(label_column))
-    else:
-        stratify_index.append(df.columns.to_list().index(label_column))
 
-    return df_merged_name, stratify_index
+    # if dataset is multilingual get the column index
+    language = [df.columns.to_list().index('language')] if 'language' in df.columns.to_list() else []
+
+    return df_merged_name, language
 
 
 
@@ -123,15 +119,16 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
     # os.system(code_line)
 
 # TODO finish function
-def get_tasks(experiment=str(), path=str(), data_path=str()):
+# TODO remove prints
+def get_tasks(experiment=str(), config_path=str(), data_path=str()):
     
     # get train datasets & mtl config json
     datasets = file_list(data_path, 'train')
-    config_json = file_list(path, 'mtl')[0]
+    config_json = file_list(config_path, 'mtl')[0]
     tasks = dict()
 
     # open config in python dict
-    with open(path + '/' + config_json, 'r') as f:
+    with open(config_path + '/' + config_json, 'r') as f:
         conf_dict = f.read()        
     conf_dict = json.loads(conf_dict)
     
@@ -144,6 +141,10 @@ def get_tasks(experiment=str(), path=str(), data_path=str()):
         tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
         
         df = pd.read_csv(data_path + '/' + tasks[task]['train'], sep=tasks[task]['split'])
+        
+        tasks[task]['text'] = list(df.columns)[tasks[task]['sent_idxs']-1]
+        tasks[task]['label'] = list(df.columns)[tasks[task]['column_idx']-1]
+   
         print(df.head())
         print('##################################')
         print(tasks[task])

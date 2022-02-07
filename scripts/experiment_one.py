@@ -33,61 +33,59 @@ info_config = config_files + '_informatio_'
 dataset_config = config_files + '_data_'
 parameter_config = config_files + '_parameter_'
 
-# TODO Change data_aquisition to download data from drive
+#TODO FIX problem whem commet download data
+#DEBUG dont download data
 # grab data from drive
-# data_acquisition(config_path, info['source_data_path'], data_path)
 download_data(info['data_urls'], data_path)
 
-# # TODO finish get_task func and modify process_data func at the same time
-# # tasks = get_tasks(info['experiment'], config_path, data_path)
-# tasks = {'DETOXIS':{'text':'comment','label':'toxicity'},
-#             'EXIST':{'text':'text','label':'task1'}}
+# TODO finish get_task func and modify process_data func at the same time
+tasks = get_tasks(info['experiment'], config_path, data_path)
 
-# #pytorch check for GPU
-# if info['device'].lower() == 'auto':
-#     info['device'] = 0 if torch.cuda.is_available() else -1
+#TODO fix no cuda
+#pytorch check for GPU
+if info['device'].lower() == 'auto':
+    info['device'] = 0 if torch.cuda.is_available() else -1
     
-# # create objs to create the k folds
-# simple_kfold = StratifiedKFold(n_splits=info['folds_number'], random_state=42, shuffle=True)
-# multi_label_kfold = MultilabelStratifiedKFold(n_splits=info['folds_number'], random_state=42, shuffle=True)
+# create objs to create the k folds
+simple_kfold = StratifiedKFold(n_splits=info['folds_number'], random_state=42, shuffle=True)
+multi_label_kfold = MultilabelStratifiedKFold(n_splits=info['folds_number'], random_state=42, shuffle=True)
 
-# # process data for machamp standards & add info to data/taks dictionary
-# for task in tasks.keys():
-#     # file, stratify_col = process_data(data_path, task, tasks[task]['text'], tasks[task]['label'])
-#     file, stratify_col = process_data(data_path, task, tasks[task]['sent_idxs'], tasks[task]['column_idx'])
-#     df = pd.read_csv(data_path + '/' + file, header=None, index_col=0, sep="\t").reset_index(drop=True)
-#     kfold = multi_label_kfold if len(stratify_col) > 1 else simple_kfold
+# process data for machamp standards & add info to data/taks dictionary
+for task in tasks.keys():
+    file, lang_index = process_data(data_path, task, tasks[task]['text'], tasks[task]['label'])
+    tasks[task]['stratify_col'] = [tasks[task]['column_idx']] + lang_index
+    tasks[task]['file'] = file
     
-#     tasks[task]['file'] = file
-#     tasks[task]['stratify_col'] = stratify_col
-#     tasks[task]['df'] = df
-#     tasks[task]['kfold'] = kfold.split(np.zeros(len(df)), df.iloc[:, stratify_col])
+    df = pd.read_csv(data_path + '/' + file, header=None, index_col=0, sep="\t").reset_index(drop=True)
+    kfold = multi_label_kfold if len(tasks[task]['stratify_col']) > 1 else simple_kfold
+    tasks[task]['df'] = df
+    tasks[task]['kfold'] = kfold.split(np.zeros(len(df)), df.iloc[:, tasks[task]['stratify_col']])
 
-# # Save data folds and Train the models
-# split_sequence = tasks.keys()
-# for idxs in zip(*[tasks[data]['kfold'] for data in split_sequence]):
-#     for idx,task in zip(idxs, split_sequence):
-#         tasks[task]['df'].iloc[idx[0]].reset_index(drop=True).to_csv(data_path + '/' + tasks[task]['file'].split('_')[0] + '_processed' + '_[TRAIN]' + '.tsv', header=None, sep="\t")
-#         tasks[task]['df'].iloc[idx[1]].reset_index(drop=True).to_csv(data_path + '/' + tasks[task]['file'].split('_')[0] + '_processed' + '_[VAL]' + '.tsv', header=None, sep="\t")
+# Save data folds and Train the models
+split_sequence = tasks.keys()
+for idxs in zip(*[tasks[data]['kfold'] for data in split_sequence]):
+    for idx,task in zip(idxs, split_sequence):
+        tasks[task]['df'].iloc[idx[0]].reset_index(drop=True).to_csv(data_path + '/' + tasks[task]['file'].split('_')[0] + '_processed' + '_[TRAIN]' + '.tsv', header=None, sep="\t")
+        tasks[task]['df'].iloc[idx[1]].reset_index(drop=True).to_csv(data_path + '/' + tasks[task]['file'].split('_')[0] + '_processed' + '_[VAL]' + '.tsv', header=None, sep="\t")
     
-#     for model in ['mtl'] + ['stl_' + tasks.lower() for tasks in tasks.keys()]:
-#         output_path = info['experiment'] + '/' + model 
-#         train(
-#             dataset_config + model + '_config.json',
-#             info['device'],
-#             output_path,
-#             parameter_config + 'config.json')
+    for model in ['mtl'] + ['stl_' + tasks.lower() for tasks in tasks.keys()]:
+        output_path = info['experiment'] + '/' + model 
+        train(
+            dataset_config + model + '_config.json',
+            info['device'],
+            output_path,
+            parameter_config + 'config.json')
             
-#         #DEBUG add "Break" for the BUG purpose
-#         break
+        #DEBUG add "Break" for the BUG purpose
+        break
     
-#     #DEBUG add "Break" for the BUG purpose
-#     break
+    #DEBUG add "Break" for the BUG purpose
+    break
 
-# # TODO group all functions in a class
+# TODO group all functions in a class
 
-# # TODO change debug for a away to test the code outomatic
+# TODO change debug for a away to test the code outomatic
 
-# #TODO add the avg func
-# # average(info['folds_number'], repo_path + '/machamp/logs/' + info['experiment'], models)
+#TODO add the avg func
+# average(info['folds_number'], repo_path + '/machamp/logs/' + info['experiment'], models)
 
