@@ -2,6 +2,29 @@ import os
 import shutil
 import pandas as pd
 import json
+import gdown
+
+#TODO TEST IT
+def download_data(urls=dict(), target_folder=str()):
+    #TODO ADD CREATE DATA FOLDER IF IT NOT EXIST
+    # create a data folder
+    if os.path.exists(target_folder):
+        shutil.rmtree(target_folder)
+    os.makedirs(target_folder)
+    
+    for task,url in urls.items():
+        #download data folders to current directory
+        gdown.download_folder(url, quiet=True)
+        sorce_folder = os.path.abspath(os.getcwd()) + '/' + task
+        
+        # move datasets to the data folder
+        file_names = os.listdir(sorce_folder)
+        for file_name in file_names:
+            shutil.move(os.path.join(sorce_folder, file_name), target_folder)
+            
+        # delete data folders from current directory
+        shutil.rmtree(sorce_folder)
+
 
 def data_acquisition(config_path=str(), source_path=str(), target_folder=str()):
     
