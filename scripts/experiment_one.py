@@ -1,7 +1,6 @@
-##Test
-
 # dependencies
 import argparse
+from distutils.log import debug
 import os
 import pandas as pd
 import numpy as np
@@ -13,12 +12,18 @@ from utils import process_data, data_acquisition, train, get_tasks, download_dat
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--information_config", default="", type=str, help="Modes configuration file")
+parser.add_argument("--debug", default=False, help="Must be True or False", action='store_true')
 args = parser.parse_args()
 
 if args.information_config == '':
     print('Specifying --information_config path is required')
     exit(1)
 
+print('****************************')
+print(args.debug)
+print(type(args.debug))
+print('****************************')
+    
 # reading info config file
 with open('../config' + '/' + args.information_config, 'r') as f:
     conf_info_dict = f.read()
@@ -35,10 +40,11 @@ info_config = config_files + '_informatio_'
 dataset_config = config_files + '_data_'
 parameter_config = config_files + '_parameter_'
 
-#DEBUG dont download data
-# grab data from drive
-# download_data(info['data_urls'], data_path)
+# grab data from drive #DEBUG download data
+if args.debug == False:
+    download_data(info['data_urls'], data_path)
 
+print()
 # TODO finish get_task func and modify process_data func at the same time
 tasks = get_tasks(info['experiment'], config_path, data_path)
 
@@ -52,7 +58,7 @@ multi_label_kfold = MultilabelStratifiedKFold(n_splits=info['folds_number'], ran
 
 # process data for machamp standards & add info to data/taks dictionary
 for task in tasks.keys():
-    file, lang_index = process_data(data_path, task, tasks[task]['text'], tasks[task]['label'])
+    file, lang_index = process_data(data_path, task, tasks[task]['text'], args.debug)
     tasks[task]['stratify_col'] = [tasks[task]['column_idx']] + lang_index
     tasks[task]['file'] = file
     
@@ -76,11 +82,13 @@ for idxs in zip(*[tasks[data]['kfold'] for data in split_sequence]):
             output_path,
             parameter_config + 'config.json')
             
-        #DEBUG add "Break" for the BUG purpose
-        break
+        #DEBUG add "Break"
+        if args.debug == True:
+            break
     
-    #DEBUG add "Break" for the BUG purpose
-    break
+    #DEBUG add "Break"
+    if args.debug == True:
+        break
 
 # TODO group all functions in a class
 
@@ -88,4 +96,3 @@ for idxs in zip(*[tasks[data]['kfold'] for data in split_sequence]):
 
 #TODO add the avg func
 # average(info['folds_number'], repo_path + '/machamp/logs/' + info['experiment'], models)
-
