@@ -69,8 +69,8 @@ def process_data(path=str(), dataset_name=str(), text_column=str(), label_column
     file_names = file_list(path, dataset_name)
     merge_list = list()
     
-    datasets = {'.csv':[name for name in file_names if '.csv' in name],
-                '.tsv':[name for name in file_names if '.tsv' in name]}
+    datasets = {'.csv':[name for name in file_names if '.csv' in name and 'processed' not in name],
+                '.tsv':[name for name in file_names if '.tsv' in name and 'processed' not in name]}
     
     for k,v in datasets.items():
         divide_columns = ',' if k == '.csv' else '\t'
@@ -131,6 +131,9 @@ def get_tasks(experiment=str(), config_path=str(), data_path=str()):
     with open(config_path + '/' + config_json, 'r') as f:
         conf_dict = f.read()        
     conf_dict = json.loads(conf_dict)
+
+    print(conf_dict)
+    print('##################################')
     
     # add new information to dict
     for task, info in conf_dict.items():
@@ -149,9 +152,8 @@ def get_tasks(experiment=str(), config_path=str(), data_path=str()):
         print('##################################')
         print(tasks[task])
         print('##################################')
-    
-    print(conf_dict)
-    print('##################################')
+        print(tasks)
+        print('##################################')
 
     return tasks
 
