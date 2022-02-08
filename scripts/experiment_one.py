@@ -18,11 +18,6 @@ args = parser.parse_args()
 if args.information_config == '':
     print('Specifying --information_config path is required')
     exit(1)
-
-print('****************************')
-print(args.debug)
-print(type(args.debug))
-print('****************************')
     
 # reading info config file
 with open('../config' + '/' + args.information_config, 'r') as f:
