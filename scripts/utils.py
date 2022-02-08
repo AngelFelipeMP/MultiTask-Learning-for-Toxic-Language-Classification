@@ -30,7 +30,6 @@ def download_data(urls=dict(), target_folder=str()):
 def data_acquisition(config_path=str(), source_path=str(), target_folder=str()):
     
     # get task/dataset names
-    print(config_path)
     file = file_list(config_path, 'mtl')[0]
     with open(config_path + '/' + file, 'r') as f:
         conf_dict = f.read()
@@ -59,7 +58,7 @@ def file_list(path=str(), word_in=str()):
     
     file_list = os.listdir(path)
     file_list = [file_name for file_name in file_list if word_in in file_name]
-    print(f'List of {word_in} files/csv/tsv {file_list}')
+    # print(f'List of {word_in} files {file_list}')
     return file_list
 
 
@@ -116,13 +115,13 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
     code_line = code_line + ' --parameters_config ' + parameter_config
     
     #DEBUG May only print command
-    # print('\n')
-    # print(code_line)
-    # print('\n')
-    os.system(code_line)
+    print('\n')
+    print(code_line)
+    print('\n')
+    # os.system(code_line)
 
-# TODO finish function
-# TODO remove prints
+
+
 def get_tasks(experiment=str(), config_path=str(), data_path=str()):
     
     # get train datasets & mtl config json
@@ -134,9 +133,6 @@ def get_tasks(experiment=str(), config_path=str(), data_path=str()):
     with open(config_path + '/' + config_json, 'r') as f:
         conf_dict = f.read()        
     conf_dict = json.loads(conf_dict)
-
-    print(conf_dict)
-    print('##################################')
     
     # add new information to dict
     for task, info in conf_dict.items():
@@ -150,15 +146,10 @@ def get_tasks(experiment=str(), config_path=str(), data_path=str()):
         
         tasks[task]['text'] = list(df.columns)[tasks[task]['sent_idxs']-1]
         tasks[task]['label'] = list(df.columns)[tasks[task]['column_idx']-1]
-   
-        print(df.head())
-        print('##################################')
-        print(tasks[task])
-        print('##################################')
-        print(tasks)
-        print('##################################')
-
+        
     return tasks
+
+
 
 def average(folds_number=int(), log_path=str(), models=list()):
     # TODO -> write avg func

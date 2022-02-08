@@ -39,8 +39,7 @@ parameter_config = config_files + '_parameter_'
 if args.debug == False:
     download_data(info['data_urls'], data_path)
 
-print()
-# TODO finish get_task func and modify process_data func at the same time
+# get tasks/dataset name + informations
 tasks = get_tasks(info['experiment'], config_path, data_path)
 
 #pytorch check for GPU
@@ -86,8 +85,6 @@ for idxs in zip(*[tasks[data]['kfold'] for data in split_sequence]):
         break
 
 # TODO group all functions in a class
-
-# TODO change debug for a away to test the code outomatic
 
 #TODO add the avg func
 # average(info['folds_number'], repo_path + '/machamp/logs/' + info['experiment'], models)
