@@ -5,6 +5,15 @@ import json
 import gdown
 
 
+def file_list(path=str(), word_in=str()):
+    
+    file_list = os.listdir(path)
+    file_list = [file_name for file_name in file_list if word_in in file_name]
+    # spprint(f'List of {word_in} files {file_list}')
+    return file_list
+
+
+
 def download_data(urls=dict(), target_folder=str()):
     
     # create a data folder
@@ -51,15 +60,6 @@ def data_acquisition(config_path=str(), source_path=str(), target_folder=str()):
             if os.path.isfile(source):
                 shutil.copy(source, destination)
                 print('copied', file_name)
-
-
-
-def file_list(path=str(), word_in=str()):
-    
-    file_list = os.listdir(path)
-    file_list = [file_name for file_name in file_list if word_in in file_name]
-    # print(f'List of {word_in} files {file_list}')
-    return file_list
 
 
 
@@ -122,7 +122,7 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
 
 
 
-def get_tasks(experiment=str(), config_path=str(), data_path=str()):
+def get_tasks(config_path=str(), data_path=str()):
     
     # get train datasets & mtl config json
     datasets = file_list(data_path, 'train')
@@ -139,7 +139,7 @@ def get_tasks(experiment=str(), config_path=str(), data_path=str()):
         tasks[task] = dict()
         tasks[task]['sent_idxs'] = info['sent_idxs'][0]
         tasks[task]['column_idx'] = list(info['tasks'].values())[0]['column_idx']
-        tasks[task]['train'] = [dataset for dataset in datasets if task in dataset][0]
+        tasks[task]['train'] = [dataset for dataset in datasets if task in dataset and 'processed' not in dataset][0]
         tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
         
         df = pd.read_csv(data_path + '/' + tasks[task]['train'], sep=tasks[task]['split'])

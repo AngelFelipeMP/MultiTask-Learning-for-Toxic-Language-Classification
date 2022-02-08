@@ -8,13 +8,14 @@ import torch
 import json
 from sklearn.model_selection import StratifiedKFold
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
-from utils import process_data, data_acquisition, train, get_tasks, download_data
+from utils import process_data, train, get_tasks, download_data
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--information_config", default="", type=str, help="Modes configuration file")
 parser.add_argument("--debug", default=False, help="Must be True or False", action='store_true')
 args = parser.parse_args()
 
+# check information config
 if args.information_config == '':
     print('Specifying --information_config path is required')
     exit(1)
@@ -35,14 +36,15 @@ info_config = config_files + '_informatio_'
 dataset_config = config_files + '_data_'
 parameter_config = config_files + '_parameter_'
 
-# grab data from drive #DEBUG download data
+#DEBUG download data
+# grab data from drive 
 if args.debug == False:
     download_data(info['data_urls'], data_path)
 
-# get tasks/dataset name + informations
-tasks = get_tasks(info['experiment'], config_path, data_path)
+# get tasks/dataset name + information's
+tasks = get_tasks(config_path, data_path)
 
-#pytorch check for GPU
+# pytorch check for GPU
 if info['device'].lower() == 'auto':
     info['device'] = 0 if torch.cuda.is_available() else -1
     
@@ -50,7 +52,7 @@ if info['device'].lower() == 'auto':
 simple_kfold = StratifiedKFold(n_splits=info['folds_number'], random_state=42, shuffle=True)
 multi_label_kfold = MultilabelStratifiedKFold(n_splits=info['folds_number'], random_state=42, shuffle=True)
 
-# process data for machamp standards & add info to data/taks dictionary
+# process data for machamp standards & add info to data/tasks dictionary
 for task in tasks.keys():
     file, lang_index = process_data(data_path, task, tasks[task]['text'], args.debug)
     tasks[task]['stratify_col'] = [tasks[task]['column_idx']] + lang_index
@@ -61,7 +63,7 @@ for task in tasks.keys():
     tasks[task]['df'] = df
     tasks[task]['kfold'] = kfold.split(np.zeros(len(df)), df.iloc[:, tasks[task]['stratify_col']])
 
-# Save data folds and Train the models
+# Save data folds and train the models
 split_sequence = tasks.keys()
 for idxs in zip(*[tasks[data]['kfold'] for data in split_sequence]):
     for idx,task in zip(idxs, split_sequence):
