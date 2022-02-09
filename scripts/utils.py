@@ -5,61 +5,93 @@ import json
 import gdown
 
 
-def file_list(path=str(), word_in=str()):
+class MtlClass:
+    '''Class for train a mtl model'''
+    def __init__(self, info):
+        self.info_dict = info
+        self.path = '/' + '/'.join(os.path.abspath(os.getcwd()).split('/')[1:-2])
+        self.repo_path = '/' + '/'.join(os.path.abspath(os.getcwd()).split('/')[1:-1])
+        self.data_path = self.path + '/data'
+        self.results_path = self.path + '/E1_results'
+        self.config_path = self.repo_path + '/config/' + self.info_dict['experiment']
+        self.config_files = self.config_path + '/' + self.info_dict['experiment']
+        self.info_config = self.config_files + '_informatio_'
+        self.dataset_config = self.config_files + '_data_'
+        self.parameter_config = self.config_files + '_parameter_'
     
-    file_list = os.listdir(path)
-    file_list = [file_name for file_name in file_list if word_in in file_name]
-    # spprint(f'List of {word_in} files {file_list}')
-    return file_list
 
-
-
-def download_data(urls=dict(), target_folder=str()):
-    
-    # create a data folder
-    if os.path.exists(target_folder):
-        shutil.rmtree(target_folder)
-    os.makedirs(target_folder)
-    
-    for task,url in urls.items():
-        #download data folders to current directory
-        gdown.download_folder(url, quiet=True)
-        sorce_folder = os.path.abspath(os.getcwd()) + '/' + task
+    def download_data(self):
+        # create a data folder
+        if os.path.exists(self.data_path):
+            shutil.rmtree(self.data_path)
+        os.makedirs(self.data_path)
         
-        # move datasets to the data folder
-        file_names = os.listdir(sorce_folder)
-        for file_name in file_names:
-            shutil.move(os.path.join(sorce_folder, file_name), target_folder)
+        for task,url in self.info_dict['data_urls'].items():
+            #download data folders to current directory
+            gdown.download_folder(url, quiet=True)
+            sorce_folder = os.path.abspath(os.getcwd()) + '/' + task
             
-        # delete data folders from current directory
-        shutil.rmtree(sorce_folder)
+            # move datasets to the data folder
+            file_names = os.listdir(sorce_folder)
+            for file_name in file_names:
+                shutil.move(os.path.join(sorce_folder, file_name), self.data_path)
+                
+            # delete data folders from current directory
+            shutil.rmtree(sorce_folder)
+        
 
 
 
-def data_acquisition(config_path=str(), source_path=str(), target_folder=str()):
+
+
+# def download_data(urls=dict(), target_folder=str()):
     
-    # get task/dataset names
-    file = file_list(config_path, 'mtl')[0]
-    with open(config_path + '/' + file, 'r') as f:
-        conf_dict = f.read()
-    js = json.loads(conf_dict)
-    datasets = list(js.keys())
+#     # create a data folder
+#     if os.path.exists(target_folder):
+#         shutil.rmtree(target_folder)
+#     os.makedirs(target_folder)
     
-    # create a data folder
-    if os.path.exists(target_folder):
-        shutil.rmtree(target_folder)
-    os.makedirs(target_folder)
-    # fetch all files
-    for dataset in datasets:
-        source_folder = source_path + '/' + dataset
-        for file_name in os.listdir(source_folder):
-            # construct full file path
-            source = source_folder + '/' + file_name
-            destination = target_folder + '/' + file_name
-            # copy only files
-            if os.path.isfile(source):
-                shutil.copy(source, destination)
-                print('copied', file_name)
+#     for task,url in urls.items():
+#         #download data folders to current directory
+#         gdown.download_folder(url, quiet=True)
+#         sorce_folder = os.path.abspath(os.getcwd()) + '/' + task
+        
+#         # move datasets to the data folder
+#         file_names = os.listdir(sorce_folder)
+#         for file_name in file_names:
+#             shutil.move(os.path.join(sorce_folder, file_name), target_folder)
+            
+#         # delete data folders from current directory
+#         shutil.rmtree(sorce_folder)
+
+
+def get_tasks(config_path=str(), data_path=str()):
+    
+    # get train datasets & mtl config json
+    datasets = file_list(data_path, 'train')
+    config_json = file_list(config_path, 'mtl')[0]
+    tasks = dict()
+
+    # open config in python dict
+    with open(config_path + '/' + config_json, 'r') as f:
+        conf_dict = f.read()        
+    conf_dict = json.loads(conf_dict)
+    
+    # add new information to dict
+    for task, info in conf_dict.items():
+        tasks[task] = dict()
+        tasks[task]['sent_idxs'] = info['sent_idxs'][0]
+        tasks[task]['column_idx'] = list(info['tasks'].values())[0]['column_idx']
+        tasks[task]['train'] = [dataset for dataset in datasets if task in dataset and 'processed' not in dataset][0]
+        tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
+        
+        df = pd.read_csv(data_path + '/' + tasks[task]['train'], sep=tasks[task]['split'])
+        
+        tasks[task]['text'] = list(df.columns)[tasks[task]['sent_idxs']-1]
+        tasks[task]['label'] = list(df.columns)[tasks[task]['column_idx']-1]
+        
+    return tasks
+
 
 
 
@@ -122,32 +154,39 @@ def train(dataset_config=str(), device=int(), output_path=str(), parameter_confi
 
 
 
-def get_tasks(config_path=str(), data_path=str()):
+def data_acquisition(config_path=str(), source_path=str(), target_folder=str()):
     
-    # get train datasets & mtl config json
-    datasets = file_list(data_path, 'train')
-    config_json = file_list(config_path, 'mtl')[0]
-    tasks = dict()
+    # get task/dataset names
+    file = file_list(config_path, 'mtl')[0]
+    with open(config_path + '/' + file, 'r') as f:
+        conf_dict = f.read()
+    js = json.loads(conf_dict)
+    datasets = list(js.keys())
+    
+    # create a data folder
+    if os.path.exists(target_folder):
+        shutil.rmtree(target_folder)
+    os.makedirs(target_folder)
+    # fetch all files
+    for dataset in datasets:
+        source_folder = source_path + '/' + dataset
+        for file_name in os.listdir(source_folder):
+            # construct full file path
+            source = source_folder + '/' + file_name
+            destination = target_folder + '/' + file_name
+            # copy only files
+            if os.path.isfile(source):
+                shutil.copy(source, destination)
+                print('copied', file_name)
 
-    # open config in python dict
-    with open(config_path + '/' + config_json, 'r') as f:
-        conf_dict = f.read()        
-    conf_dict = json.loads(conf_dict)
+
+
+def file_list(path=str(), word_in=str()):
     
-    # add new information to dict
-    for task, info in conf_dict.items():
-        tasks[task] = dict()
-        tasks[task]['sent_idxs'] = info['sent_idxs'][0]
-        tasks[task]['column_idx'] = list(info['tasks'].values())[0]['column_idx']
-        tasks[task]['train'] = [dataset for dataset in datasets if task in dataset and 'processed' not in dataset][0]
-        tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
-        
-        df = pd.read_csv(data_path + '/' + tasks[task]['train'], sep=tasks[task]['split'])
-        
-        tasks[task]['text'] = list(df.columns)[tasks[task]['sent_idxs']-1]
-        tasks[task]['label'] = list(df.columns)[tasks[task]['column_idx']-1]
-        
-    return tasks
+    file_list = os.listdir(path)
+    file_list = [file_name for file_name in file_list if word_in in file_name]
+    # spprint(f'List of {word_in} files {file_list}')
+    return file_list
 
 
 
