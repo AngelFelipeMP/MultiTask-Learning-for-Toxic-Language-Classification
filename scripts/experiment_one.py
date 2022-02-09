@@ -29,11 +29,15 @@ info = json.loads(conf_info_dict)
 #creating the mtl object
 MTL = MtlClass(info)
 
+#DEBUG download data
 # grab data from drive 
 if args.debug == False:
     MTL.download_data()
+    
+# get tasks/dataset name + information's
+tasks = MTL.get_tasks()
+print(tasks)
 
-#TODO transfer all fuctions to a class !!!!
 
 # # # base data/config/results path
 # # path = '/' + '/'.join(os.path.abspath(os.getcwd()).split('/')[1:-2])
@@ -53,6 +57,7 @@ if args.debug == False:
 
 # # get tasks/dataset name + information's
 # tasks = get_tasks(config_path, data_path)
+
 
 # # pytorch check for GPU
 # if info['device'].lower() == 'auto':

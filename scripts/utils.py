@@ -7,7 +7,7 @@ import gdown
 
 class MtlClass:
     '''Class for train a mtl model'''
-    def __init__(self, info):
+    def __init__(self, info=dict()):
         self.info_dict = info
         self.path = '/' + '/'.join(os.path.abspath(os.getcwd()).split('/')[1:-2])
         self.repo_path = '/' + '/'.join(os.path.abspath(os.getcwd()).split('/')[1:-1])
@@ -18,8 +18,8 @@ class MtlClass:
         self.info_config = self.config_files + '_informatio_'
         self.dataset_config = self.config_files + '_data_'
         self.parameter_config = self.config_files + '_parameter_'
-    
-
+        
+        
     def download_data(self):
         # create a data folder
         if os.path.exists(self.data_path):
@@ -38,9 +38,36 @@ class MtlClass:
                 
             # delete data folders from current directory
             shutil.rmtree(sorce_folder)
+            
+            
+    def get_tasks(self):
+        # get train datasets & mtl config json
+        datasets = file_list(self.data_path, 'train')
+        config_json = file_list(self.config_path, 'mtl')[0]
+        tasks = dict()
+
+        # open config in python dict
+        with open(self.config_path + '/' + config_json, 'r') as f:
+            conf_dict = f.read()        
+        conf_dict = json.loads(conf_dict)
         
-
-
+        # add new information to dict
+        for task, info in conf_dict.items():
+            tasks[task] = dict()
+            tasks[task]['sent_idxs'] = info['sent_idxs'][0]
+            tasks[task]['column_idx'] = list(info['tasks'].values())[0]['column_idx']
+            tasks[task]['train'] = [dataset for dataset in datasets if task in dataset and 'processed' not in dataset][0]
+            tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
+            
+            df = pd.read_csv(self.data_path + '/' + tasks[task]['train'], sep=tasks[task]['split'])
+            
+            tasks[task]['text'] = list(df.columns)[tasks[task]['sent_idxs']-1]
+            tasks[task]['label'] = list(df.columns)[tasks[task]['column_idx']-1]
+            
+            # save tasks for the all class
+            self.tasks = tasks
+            
+        return self.tasks
 
 
 
@@ -65,32 +92,32 @@ class MtlClass:
 #         shutil.rmtree(sorce_folder)
 
 
-def get_tasks(config_path=str(), data_path=str()):
+# def get_tasks(config_path=str(), data_path=str()):
     
-    # get train datasets & mtl config json
-    datasets = file_list(data_path, 'train')
-    config_json = file_list(config_path, 'mtl')[0]
-    tasks = dict()
+#     # get train datasets & mtl config json
+#     datasets = file_list(data_path, 'train')
+#     config_json = file_list(config_path, 'mtl')[0]
+#     tasks = dict()
 
-    # open config in python dict
-    with open(config_path + '/' + config_json, 'r') as f:
-        conf_dict = f.read()        
-    conf_dict = json.loads(conf_dict)
+#     # open config in python dict
+#     with open(config_path + '/' + config_json, 'r') as f:
+#         conf_dict = f.read()        
+#     conf_dict = json.loads(conf_dict)
     
-    # add new information to dict
-    for task, info in conf_dict.items():
-        tasks[task] = dict()
-        tasks[task]['sent_idxs'] = info['sent_idxs'][0]
-        tasks[task]['column_idx'] = list(info['tasks'].values())[0]['column_idx']
-        tasks[task]['train'] = [dataset for dataset in datasets if task in dataset and 'processed' not in dataset][0]
-        tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
+#     # add new information to dict
+#     for task, info in conf_dict.items():
+#         tasks[task] = dict()
+#         tasks[task]['sent_idxs'] = info['sent_idxs'][0]
+#         tasks[task]['column_idx'] = list(info['tasks'].values())[0]['column_idx']
+#         tasks[task]['train'] = [dataset for dataset in datasets if task in dataset and 'processed' not in dataset][0]
+#         tasks[task]['split'] = '\t' if '.tsv' in tasks[task]['train'] else ','
         
-        df = pd.read_csv(data_path + '/' + tasks[task]['train'], sep=tasks[task]['split'])
+#         df = pd.read_csv(data_path + '/' + tasks[task]['train'], sep=tasks[task]['split'])
         
-        tasks[task]['text'] = list(df.columns)[tasks[task]['sent_idxs']-1]
-        tasks[task]['label'] = list(df.columns)[tasks[task]['column_idx']-1]
+#         tasks[task]['text'] = list(df.columns)[tasks[task]['sent_idxs']-1]
+#         tasks[task]['label'] = list(df.columns)[tasks[task]['column_idx']-1]
         
-    return tasks
+#     return tasks
 
 
 
