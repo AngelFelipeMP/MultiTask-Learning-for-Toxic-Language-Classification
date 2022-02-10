@@ -2,5 +2,9 @@
     "experiment": "E1",
     "device": "Auto",
     "folds_number": 2,
-    "source_data_path": "/Users/angel_de_paula/angel.magnossao@alumni.usp.br - Google Drive/My Drive/Code/MTL_2021/Data"
+    "data_urls":{
+        "EXIST":"",
+        "DETOXIS":""
+    }
 }
+

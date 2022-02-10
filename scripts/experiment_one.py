@@ -3,6 +3,7 @@ import argparse
 from sklearn.model_selection import StratifiedKFold
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 from utils import MtlClass
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--information_config", default="", type=str, help="Modes configuration file")
@@ -13,18 +14,22 @@ args = parser.parse_args()
 if args.information_config == '':
     print('Specifying --information_config path is required')
     exit(1)
+
+if not os.path.exists('../config' + '/' + args.information_config):
+    print('The --information_config does not exist path')
+    print('Enter with a valide path')
+    exit(1)
+    
     
 #creating the mtl object
-MTL = MtlClass(info_path=args.information_config, fetch_data=True, debug=args.debug)
+MTL = MtlClass(info_path=args.information_config, fetch_data=False, debug=args.debug)
 
 # Save data folds and train the models
-split_sequence = MTL.tasks.keys()
-
-for idxs in zip(*[MTL.tasks[data]['kfold'] for data in split_sequence]):
+for idxs in zip(*[MTL.tasks[task_]['kfold'] for task_ in MTL.tasks.keys()]):
     #save
-    for idx,task in zip(idxs, split_sequence):
-        MTL.tasks[task]['df'].iloc[idx[0]].reset_index(drop=True).to_csv(MTL.data_path + '/' + MTL.tasks[task]['file'].split('_')[0] + '_processed' + '_[TRAIN]' + '.tsv', header=None, sep="\t")
-        MTL.tasks[task]['df'].iloc[idx[1]].reset_index(drop=True).to_csv(MTL.data_path + '/' + MTL.tasks[task]['file'].split('_')[0] + '_processed' + '_[VAL]' + '.tsv', header=None, sep="\t")
+    for idx,task in zip(idxs, MTL.tasks.keys()):
+        MTL.tasks[task]['df'].iloc[idx[0]].reset_index(drop=True).to_csv(MTL.data_path + '/' + MTL.tasks[task]['merged'].split('_')[0] + '_processed' + '_[TRAIN]' + '.tsv', header=None, sep="\t")
+        MTL.tasks[task]['df'].iloc[idx[1]].reset_index(drop=True).to_csv(MTL.data_path + '/' + MTL.tasks[task]['merged'].split('_')[0] + '_processed' + '_[VAL]' + '.tsv', header=None, sep="\t")
     
     #train
     for model in ['mtl'] + ['stl_' + t.lower() for t in MTL.tasks.keys()]:
@@ -38,5 +43,7 @@ for idxs in zip(*[MTL.tasks[data]['kfold'] for data in split_sequence]):
     if args.debug == True:
         break
 
-# #TODO add the avg func
+# TODO comment this
+#TODO add the avg func for the class
+
 # # average(info['folds_number'], repo_path + '/machamp/logs/' + info['experiment'], models)
