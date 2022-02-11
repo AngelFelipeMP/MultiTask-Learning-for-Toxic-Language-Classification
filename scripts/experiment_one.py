@@ -1,7 +1,5 @@
 # dependencies
 import argparse
-from sklearn.model_selection import StratifiedKFold
-from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 from utils import MtlClass
 import os
 
@@ -43,7 +41,6 @@ for idxs in zip(*[MTL.tasks[task_]['kfold'] for task_ in MTL.tasks.keys()]):
     if args.debug == True:
         break
 
-# TODO comment this
 #TODO add the avg func for the class
-
-# # average(info['folds_number'], repo_path + '/machamp/logs/' + info['experiment'], models)
+# Average resuls
+MTL.average()

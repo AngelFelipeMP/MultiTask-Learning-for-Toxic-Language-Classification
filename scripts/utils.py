@@ -4,6 +4,7 @@ import pandas as pd
 import json
 import gdown
 from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import accuracy_score, f1_score
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 import pandas as pd
 import numpy as np
@@ -19,6 +20,7 @@ class MtlClass:
         self.path = '/' + '/'.join(os.getcwd().split('/')[1:-2])
         self.repo_path = '/' + '/'.join(os.getcwd().split('/')[1:-1])
         self.data_path = self.path + '/data'
+        self.logs_path = self.repo_path + '/machamp/logs/' + self.info_dict['experiment']
         self.config_path = self.repo_path + '/config/' + self.info_dict['experiment']
         self.config_files = self.config_path + '/' + self.info_dict['experiment']
         self.dataset_config = self.config_files + '_data_'
@@ -90,6 +92,7 @@ class MtlClass:
         # add new information to dict
         for task, info in conf_dict.items():
             self.tasks[task] = dict()
+            self.tasks[task]['metric'] = list(info['tasks'].values())[0]['metric']
             self.tasks[task]['sent_idxs'] = info['sent_idxs'][0]
             self.tasks[task]['column_idx'] = list(info['tasks'].values())[0]['column_idx']
             self.tasks[task]['train'] = [dataset for dataset in datasets if task in dataset][0]
@@ -175,15 +178,107 @@ class MtlClass:
         print('\n')
         print(code_line)
         print('\n')
-        os.system(code_line)
+        # os.system(code_line)
 
+#TODO review average & score
+#TODO check the last three funcs
+#TODO test average func
+    def time_str_to_float(self, time=str()):
+        time = [ float(t) for t in time.split(':')]
+        time = time[0]*60*60 + time[1]*60 + time[1]
+        return time
+    
+    def seg_to_time(self,time=float()):
+        hours = time // 3600
+        minutes = (time % 3600) // 60
+        segundos = (time % 3600) % 60
+        return str(hours) + ':' + str(minutes) + ':' + str(segundos) 
 
+    def average(self):
+        ''' Average cross validation results and copy all results to local repo '''
+        
+        for model_result in os.listdir(self.logs_path):
+            # list to save model results
+            list_results=list()
+            
+            # get score using the prediction in each fold
+            average_score = self.score(model_result)
+            
+            for fold_result  in os.listdir(self.logs_path + '/' + model_result):
+                if 'predictions' not in fold_result and 'average' not in fold_result: 
+                
+                    print(self.logs_path + '/' + model_result + '/' + fold_result + '/metrics' + '.json')
+                    results = self.read_json(path = self.logs_path + '/' + model_result + '/' + fold_result + '/metrics' + '.json')
+                    results["training_duration"] = self.time_str_to_float(results["training_duration"])
+                    list_results.append(results)
+            
+            average_results = dict(pd.DataFrame(list_results).mean())
+            print(average_results)
+            average_results['training_duration'] = self.seg_to_time(average_results['training_duration'])
+            for k,v in average_score.items():
+                average_results[k] = v
+            
+            # save average results as .json
+            with open(self.logs_path + '/' + model_result + '/' + 'average.json', 'w') as fp:
+                json.dump(average_results, fp, indent=2)
+        
+        
+        
+    def score(self, model_result):
+        data_info = {task:{'file':task + '.dev.out', 'data':[]} for task in self.tasks.keys()}
+        
+        # aggregating data/predictions
+        for fold_result  in os.listdir(self.logs_path + '/' + model_result):
+            if 'predictions' not in fold_result and 'average' not in fold_result: 
 
-def average(folds_number=int(), log_path=str(), models=list()):
-    # TODO -> write avg func
-    ''' Average cross validation results and copy all results to local repo '''
-    #### construction
-    return
+                for task in data_info.keys():
+                    if os.path.exists(self.logs_path + '/' + model_result + '/' + fold_result + '/' + data_info[task]['file']):
+                    
+                        data_info[task]['data'].append(pd.read_csv(self.logs_path + '/' + model_result + '/' + fold_result + '/' + data_info[task]['file'], 
+                                                        header=None, 
+                                                        index_col=0, 
+                                                        sep="\t").reset_index(drop=True))
+        # save predictionds  
+        for task in data_info.keys():
+            results_dict = dict()
+            if data_info[task]['data']:
+                
+                # merge cv predictions   
+                df_predict = pd.concat(data_info[task]['data'], ignore_index=True).iloc[:,[self.tasks[task]['sent_idxs']-1,self.tasks[task]['column_idx']-1]]
+                print(df_predict.head())
+                print('\n')
+                print(df_predict.shape)
+                
+                # read cv dataset               
+                df_merge = pd.read_csv(self.data_path + '/' + self.tasks[task]['merged'], header=None, index_col=0, sep="\t").reset_index(drop=True)
+                print(df_merge.head())
+                print(df_merge.shape)
+        
+                # combay prediction & labels
+                df_predict_merge = pd.merge(df_merge, df_predict, left_on=self.tasks[task]['sent_idxs'], right_on=self.tasks[task]['sent_idxs'])
+                # df_predict_merge = pd.merge(df_merge, df_predict, how='left', on=self.tasks[task]['sent_idxs'])
+                print(df_predict_merge.head())
+                print(df_predict_merge.shape)
+                
+                
+                # save predions + labels data
+                df_predict_merge.reset_index(drop=True).to_csv(self.logs_path + '/' + model_result + '/' + task + '_predictions' + '.tsv', header=None, sep="\t")
+                
+                # df_predict_merge['20_y'] = 1
+                print(df_predict_merge.head())
+                print(self.tasks[task]['column_idx'])
+                print(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1])
+                print(df_predict_merge.iloc[:,-1])
+                
+                # caculate scores
+                if self.tasks[task]['metric'] == 'acc':
+                    score = accuracy_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1], df_predict_merge.iloc[:,-1])
+                else:
+                    score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1], df_predict_merge.iloc[:,-1])
+                    
+                results_dict[task + '_crossvalidation_' + self.tasks[task]['metric']] = score
+                    
+        return results_dict
 
 
 
