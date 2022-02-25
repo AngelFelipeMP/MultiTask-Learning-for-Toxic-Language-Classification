@@ -66,8 +66,9 @@ class MachampClassifier(Model):
             self.metrics = {"micro-f1": FBetaMeasure(average='micro')}
         elif self.metric == "macro-f1":
             self.metrics = {"macro-f1": FBetaMeasure(average='macro')}
-        elif self.metric == "f1":
-            self.metrics = {"f1": F1Measure(positive_label=1)}
+        # f1 score - not averaged
+        elif "f1_" in self.metric:
+            self.metrics = {"f1": F1Measure(positive_label=self.vocab.get_token_index(token=self.metric.split('_')[1] ,namespace=self.task))}
         else:
             print(f"ERROR. Metric \"{metric}\" unrecognized. Using accuracy \"acc\" instead.")
             self.metrics = {"acc": CategoricalAccuracy()}

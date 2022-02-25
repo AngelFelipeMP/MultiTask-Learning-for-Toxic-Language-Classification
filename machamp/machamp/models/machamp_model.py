@@ -68,10 +68,6 @@ class MachampModel(Model):
                 ) -> Dict[str, torch.Tensor]:
         """
         """
-        #print(tokens['tokens']['type_ids'].shape)
-        #tokens['tokens']['type_ids'] = torch.ones_like(tokens['tokens']['type_ids'])
-        #.shape, dtype=torch.long, device=tokens['tokens']['type_ids'].device)
-        #print(tokens['tokens']['type_ids'].shape)
         gold_labels = kwargs 
         tasks_to_handle = []
         task_types_to_handle = []
@@ -205,19 +201,9 @@ class MachampModel(Model):
                     metrics[name] = task_metric['LAS']
                 elif name.split('/')[-1] in ['micro-f1', 'macro-f1', 'f1']:
                     if 'f1' in task_metric.keys():
-                      metrics[name] = task_metric['f1']
+                        metrics[name] = task_metric['f1']
                     else:
-                      metrics[name] = task_metric['fscore']
-                # elif name.split('/')[-1] in ['f1']:
-                #     # print('-----------------------TEST-------------------')
-                #     # print(name)
-                #     # print(name.split('/')[-1])
-                #     # print(task_metric)
-                #     # print(task_metric['f1'])
-                #     # print(metrics)
-                #     # # print(metrics[name])
-                #     # print('-----------------------TEST-------------------')
-                #     metrics[name] = task_metric['f1']
+                        metrics[name] = task_metric['fscore']
                 elif name.split("/")[-1] == "span_f1":
                     metrics[name] = task_metric["f1-measure-overall"]
                 elif name.split("/")[-1] == "multi_span_f1":

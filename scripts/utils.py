@@ -102,9 +102,9 @@ class MtlClass:
             
             self.tasks[task]['text'] = list(df.columns)[self.tasks[task]['sent_idxs']-1]
             self.tasks[task]['label'] = list(df.columns)[self.tasks[task]['column_idx']-1]
-
-        
-        
+            
+            
+            
     def process_data(self, dataset_name=str(), text_column=str()):
         file_names = self.file_list(self.data_path, dataset_name)
         merge_list = list()
@@ -118,7 +118,7 @@ class MtlClass:
                 divide_columns = ',' if k == '.csv' else '\t'
                 for data in v:
                     #DEBUG "nrows" 
-                    if self.debug == True:
+                    if self.debug:
                         df = pd.read_csv(self.data_path + '/' + data, sep=divide_columns, nrows=32)
                     else:
                         df = pd.read_csv(self.data_path + '/' + data, sep=divide_columns)
@@ -158,10 +158,11 @@ class MtlClass:
         multi_label_kfold = MultilabelStratifiedKFold(n_splits=self.info_dict['folds_number'], random_state=42, shuffle=True)
         
         # add info to data/tasks dictionary
-        self.tasks[task]['stratify_col'] = [self.tasks[task]['column_idx']] + lang_index
+        self.tasks[task]['stratify_col'] = [self.tasks[task]['column_idx']-1] + lang_index
         self.tasks[task]['merged'] = merged
         
         df = pd.read_csv(self.data_path + '/' + merged, header=None, index_col=0, sep="\t").reset_index(drop=True)
+        
         kfold = multi_label_kfold if len(self.tasks[task]['stratify_col']) > 1 else simple_kfold
         self.tasks[task]['df'] = df
         self.tasks[task]['kfold'] = kfold.split(np.zeros(len(df)), df.iloc[:, self.tasks[task]['stratify_col']])
@@ -178,20 +179,22 @@ class MtlClass:
         print('\n')
         print(code_line)
         print('\n')
-        # os.system(code_line)
+        os.system(code_line)
 
 #TODO review average & score
+#TODO test average func with more data
 #TODO check the last three funcs
-#TODO test average func
+#TODO Remove English tweet must tobe optional
+
     def time_str_to_float(self, time=str()):
         time = [ float(t) for t in time.split(':')]
-        time = time[0]*60*60 + time[1]*60 + time[1]
+        time = (time[0]*60)*60 + time[1]*60 + time[2]
         return time
     
     def seg_to_time(self,time=float()):
-        hours = time // 3600
-        minutes = (time % 3600) // 60
-        segundos = (time % 3600) % 60
+        hours = int(time // 3600)
+        minutes = int((time % 3600) // 60)
+        segundos = round((time % 3600) % 60, 6)
         return str(hours) + ':' + str(minutes) + ':' + str(segundos) 
 
     def average(self):
@@ -207,13 +210,16 @@ class MtlClass:
             for fold_result  in os.listdir(self.logs_path + '/' + model_result):
                 if 'predictions' not in fold_result and 'average' not in fold_result: 
                 
-                    print(self.logs_path + '/' + model_result + '/' + fold_result + '/metrics' + '.json')
                     results = self.read_json(path = self.logs_path + '/' + model_result + '/' + fold_result + '/metrics' + '.json')
                     results["training_duration"] = self.time_str_to_float(results["training_duration"])
                     list_results.append(results)
             
             average_results = dict(pd.DataFrame(list_results).mean())
-            print(average_results)
+            # return some columns to int
+            average_results['training_start_epoch'] = int(average_results['training_start_epoch'])
+            average_results['training_epochs'] = int(average_results['training_epochs'])
+            average_results['epoch'] = int(average_results['epoch'])
+            
             average_results['training_duration'] = self.seg_to_time(average_results['training_duration'])
             for k,v in average_score.items():
                 average_results[k] = v
@@ -238,71 +244,32 @@ class MtlClass:
                                                         header=None, 
                                                         index_col=0, 
                                                         sep="\t").reset_index(drop=True))
-        # save predictionds  
+        # save predictionds 
+        results_dict = dict()
         for task in data_info.keys():
-            results_dict = dict()
             if data_info[task]['data']:
                 
                 # merge cv predictions   
                 df_predict = pd.concat(data_info[task]['data'], ignore_index=True).iloc[:,[self.tasks[task]['sent_idxs']-1,self.tasks[task]['column_idx']-1]]
-                print(df_predict.head())
-                print('\n')
-                print(df_predict.shape)
                 
                 # read cv dataset               
                 df_merge = pd.read_csv(self.data_path + '/' + self.tasks[task]['merged'], header=None, index_col=0, sep="\t").reset_index(drop=True)
-                print(df_merge.head())
-                print(df_merge.shape)
-        
+                
                 # combay prediction & labels
                 df_predict_merge = pd.merge(df_merge, df_predict, left_on=self.tasks[task]['sent_idxs'], right_on=self.tasks[task]['sent_idxs'])
-                # df_predict_merge = pd.merge(df_merge, df_predict, how='left', on=self.tasks[task]['sent_idxs'])
-                print(df_predict_merge.head())
-                print(df_predict_merge.shape)
-                
                 
                 # save predions + labels data
                 df_predict_merge.reset_index(drop=True).to_csv(self.logs_path + '/' + model_result + '/' + task + '_predictions' + '.tsv', header=None, sep="\t")
                 
-                # df_predict_merge['20_y'] = 1
-                print(df_predict_merge.head())
-                print(self.tasks[task]['column_idx'])
-                print(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1])
-                print(df_predict_merge.iloc[:,-1])
-                
                 # caculate scores
                 if self.tasks[task]['metric'] == 'acc':
                     score = accuracy_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1], df_predict_merge.iloc[:,-1])
+                # f1 score - not averaged
+                elif 'f1_' in self.tasks[task]['metric']:
+                    score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1].to_list(), df_predict_merge.iloc[:,-1].to_list(),pos_label=self.tasks[task]['metric'].split('_')[1])
                 else:
-                    score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1], df_predict_merge.iloc[:,-1])
-                    
+                    score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1].to_list(), df_predict_merge.iloc[:,-1].to_list(), average=self.tasks[task]['metric'].split('-')[0])
+                
                 results_dict[task + '_crossvalidation_' + self.tasks[task]['metric']] = score
-                    
+                
         return results_dict
-
-
-
-# def data_acquisition(config_path=str(), source_path=str(), target_folder=str()):
-    
-#     # get task/dataset names
-#     file = file_list(config_path, 'mtl')[0]
-#     with open(config_path + '/' + file, 'r') as f:
-#         conf_dict = f.read()
-#     js = json.loads(conf_dict)
-#     datasets = list(js.keys())
-    
-#     # create a data folder
-#     if os.path.exists(target_folder):
-#         shutil.rmtree(target_folder)
-#     os.makedirs(target_folder)
-#     # fetch all files
-#     for dataset in datasets:
-#         source_folder = source_path + '/' + dataset
-#         for file_name in os.listdir(source_folder):
-#             # construct full file path
-#             source = source_folder + '/' + file_name
-#             destination = target_folder + '/' + file_name
-#             # copy only files
-#             if os.path.isfile(source):
-#                 shutil.copy(source, destination)
-#                 print('copied', file_name)

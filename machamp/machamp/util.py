@@ -181,7 +181,7 @@ def predict_model_with_archive(predictor: str, params: Params, archive: str,
     archive.validation_dataset_reader.datasets = params['dataset_reader']['datasets']
     if 'is_raw' in params['dataset_reader']:
         archive.validation_dataset_reader.is_raw = params['dataset_reader']['is_raw']
-
+    
     predictor = MachampPredictor.from_archive(archive, predictor)
     
     if batch_size == None:
@@ -194,6 +194,7 @@ def predict_model_with_archive(predictor: str, params: Params, archive: str,
                               print_to_console=False,
                               has_dataset_reader=True)
     manager.run()
+
     pprint.pprint(predictor.model.get_metrics())
     pprint.pprint(predictor.model.get_metrics(), open(output_file + '.eval', 'w'))
 
