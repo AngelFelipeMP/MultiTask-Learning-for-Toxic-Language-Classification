@@ -31,18 +31,16 @@ for idxs in zip(*[MTL.tasks[task_]['kfold'] for task_ in MTL.tasks.keys()]):
     
     #train
     for model in ['mtl'] + ['stl_' + t.lower() for t in MTL.tasks.keys()]:
-        #DEBUG add "Break"
-        #COMMENT remove when finish code
-        # if 'stl_detoxis' in model:
-            MTL.train(model)
-                
-            #DEBUG add "Break"
-            if args.debug == True:
-                break
-        
+
+        MTL.train(model)
+            
         #DEBUG add "Break"
         if args.debug == True:
             break
+    
+    #DEBUG add "Break"
+    if args.debug == True:
+        break
 
 #TODO add the avg func for the class
 # Average resuls
