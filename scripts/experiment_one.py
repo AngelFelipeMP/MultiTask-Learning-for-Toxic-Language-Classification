@@ -20,20 +20,19 @@ if not os.path.exists('../config' + '/' + args.information_config):
     
     
 #creating the mtl object
-MTL = MtlClass(info_path=args.information_config, fetch_data=False, debug=args.debug)
+MTL = MtlClass(info_path=args.information_config, fetch_data=True, debug=args.debug)
 
 # Save data folds and train the models
 for idxs in zip(*[MTL.tasks[task_]['kfold'] for task_ in MTL.tasks.keys()]):
     #save
     for idx,task in zip(idxs, MTL.tasks.keys()):
-        MTL.tasks[task]['df'].iloc[idx[0]].reset_index(drop=True).to_csv(MTL.data_path + '/' + MTL.tasks[task]['merged'].split('_')[0] + '_processed' + '_[TRAIN]' + '.tsv', header=None, sep="\t")
-        MTL.tasks[task]['df'].iloc[idx[1]].reset_index(drop=True).to_csv(MTL.data_path + '/' + MTL.tasks[task]['merged'].split('_')[0] + '_processed' + '_[VAL]' + '.tsv', header=None, sep="\t")
+        MTL.tasks[task]['df'].iloc[idx[0]].reset_index(drop=True).to_csv(MTL.data_path + '/' + MTL.tasks[task]['merged'].split('_')[0] + '_processed' + '_[TRAIN]' + '.tsv', header=None, index=False, sep="\t")
+        MTL.tasks[task]['df'].iloc[idx[1]].reset_index(drop=True).to_csv(MTL.data_path + '/' + MTL.tasks[task]['merged'].split('_')[0] + '_processed' + '_[VAL]' + '.tsv', header=None, index=False, sep="\t")
     
     #train
     for model in ['mtl'] + ['stl_' + t.lower() for t in MTL.tasks.keys()]:
-
         MTL.train(model)
-            
+        
         #DEBUG add "Break"
         if args.debug == True:
             break
@@ -42,6 +41,5 @@ for idxs in zip(*[MTL.tasks[task_]['kfold'] for task_ in MTL.tasks.keys()]):
     if args.debug == True:
         break
 
-#TODO add the avg func for the class
 # Average resuls
 MTL.average()

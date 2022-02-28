@@ -49,7 +49,7 @@ class MtlClass:
     def file_list(self, path=str(), word_in=str()):
         # get list with file that contain "word_in" 
         return [file for file in os.listdir(path) if word_in in file]
-
+        
         
         
     def read_json(self, path=str()):
@@ -100,8 +100,8 @@ class MtlClass:
             
             df = pd.read_csv(self.data_path + '/' + self.tasks[task]['train'], sep=self.tasks[task]['split'])
             
-            self.tasks[task]['text'] = list(df.columns)[self.tasks[task]['sent_idxs']-1]
-            self.tasks[task]['label'] = list(df.columns)[self.tasks[task]['column_idx']-1]
+            self.tasks[task]['text'] = list(df.columns)[self.tasks[task]['sent_idxs']]
+            self.tasks[task]['label'] = list(df.columns)[self.tasks[task]['column_idx']]
             
             
             
@@ -112,7 +112,7 @@ class MtlClass:
         datasets = {'.csv':[name for name in file_names if '.csv' in name and 'processed' not in name],
                     '.tsv':[name for name in file_names if '.tsv' in name and 'processed' not in name]}
         
-        # process data for machamp standards &
+        # process data for machamp standards
         for k,v in datasets.items():
             if k:
                 divide_columns = ',' if k == '.csv' else '\t'
@@ -123,6 +123,11 @@ class MtlClass:
                     else:
                         df = pd.read_csv(self.data_path + '/' + data, sep=divide_columns)
                     
+                    #remove non-target language text
+                    if self.info_dict['language'] and 'language' in df.columns.to_list():
+                        df = df.loc[df['language'] == self.info_dict['language']].reset_index(drop=True)
+                        df.to_csv(self.data_path + '/' + data, index=False, sep=divide_columns)
+                    
                     #remove some "\t" and "\n"
                     df[text_column] = df.loc[:,text_column].apply(lambda x: x.replace('\n', ' '))
                     df[text_column] = df.loc[:,text_column].apply(lambda x: x.replace('\t', ' '))
@@ -130,8 +135,7 @@ class MtlClass:
                     
                     # save as .tsv
                     data_path_name = self.data_path + '/' + data[:-4] + '_processed' + '.tsv'
-                    df = df.reset_index(drop=True)
-                    df.to_csv(data_path_name, header=head, sep="\t")
+                    df.to_csv(data_path_name, index=False, header=head, sep="\t")
                     
                     # save data train/test to concat
                     if 'label' in data or 'train' in data:
@@ -141,7 +145,7 @@ class MtlClass:
         if merge_list:
             df = pd.concat(merge_list, ignore_index=True)
             df_merged_name = data.split('_')[0] + '_merge' + '_processed' + '.tsv'
-            df.reset_index(drop=True).to_csv(self.data_path + '/' + df_merged_name, header=head, sep="\t")
+            df.to_csv(self.data_path + '/' + df_merged_name, header=head, index=False, sep="\t")
 
         # if dataset is multilingual get the column index
         language = [df.columns.to_list().index('language')] if 'language' in df.columns.to_list() else []
@@ -158,10 +162,10 @@ class MtlClass:
         multi_label_kfold = MultilabelStratifiedKFold(n_splits=self.info_dict['folds_number'], random_state=42, shuffle=True)
         
         # add info to data/tasks dictionary
-        self.tasks[task]['stratify_col'] = [self.tasks[task]['column_idx']-1] + lang_index
+        self.tasks[task]['stratify_col'] = [self.tasks[task]['column_idx']] + lang_index
         self.tasks[task]['merged'] = merged
         
-        df = pd.read_csv(self.data_path + '/' + merged, header=None, index_col=0, sep="\t").reset_index(drop=True)
+        df = pd.read_csv(self.data_path + '/' + merged, header=None, sep="\t").reset_index(drop=True)
         
         kfold = multi_label_kfold if len(self.tasks[task]['stratify_col']) > 1 else simple_kfold
         self.tasks[task]['df'] = df
@@ -175,10 +179,7 @@ class MtlClass:
         code_line = code_line + ' --name ' + self.info_dict['experiment'] + '/' + model
         code_line = code_line + ' --parameters_config ' + self.parameter_config + 'config.json'
         
-        #DEBUG May only print command
-        print('\n')
-        print(code_line)
-        print('\n')
+        print('\n ' + code_line + '\n')
         os.system(code_line)
 
 #TODO Remove English tweet must tobe optional
@@ -244,34 +245,33 @@ class MtlClass:
                     
                         data_info[task]['data'].append(pd.read_csv(self.logs_path + '/' + model_result + '/' + fold_result + '/' + data_info[task]['file'], 
                                                         header=None, 
-                                                        index_col=0, 
-                                                        sep="\t").reset_index(drop=True))
+                                                        sep="\t"))
         # save predictionds 
         results_dict = dict()
         for task in data_info.keys():
             if data_info[task]['data']:
                 
                 # merge cv predictions   
-                df_predict = pd.concat(data_info[task]['data'], ignore_index=True).iloc[:,[self.tasks[task]['sent_idxs']-1,self.tasks[task]['column_idx']-1]]
+                df_predict = pd.concat(data_info[task]['data'], ignore_index=True).iloc[:,[self.tasks[task]['sent_idxs'],self.tasks[task]['column_idx']]]
                 
                 # read cv dataset               
-                df_merge = pd.read_csv(self.data_path + '/' + self.tasks[task]['merged'], header=None, index_col=0, sep="\t").reset_index(drop=True)
+                df_merge = pd.read_csv(self.data_path + '/' + self.tasks[task]['merged'], header=None, sep="\t").reset_index(drop=True)
                 
                 # combay prediction & labels
                 df_predict_merge = pd.merge(df_merge, df_predict, left_on=self.tasks[task]['sent_idxs'], right_on=self.tasks[task]['sent_idxs'])
                 
                 # save predions + labels data
-                df_predict_merge.reset_index(drop=True).to_csv(self.logs_path + '/' + model_result + '/' + task + '_predictions' + '.tsv', header=None, sep="\t")
+                df_predict_merge.to_csv(self.logs_path + '/' + model_result + '/' + task + '_predictions' + '.tsv', index=False, header=None, sep="\t")
                 
                 # calculate scores
                 if self.tasks[task]['metric'] == 'acc':
-                    score = accuracy_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1], df_predict_merge.iloc[:,-1])
+                    score = accuracy_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']], df_predict_merge.iloc[:,-1])
                 # f1 score - not averaged
                 elif 'f1_' in self.tasks[task]['metric']:
-                    score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1].to_list(), df_predict_merge.iloc[:,-1].to_list(),pos_label=self.tasks[task]['metric'].split('_')[1])
+                    score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']].to_list(), df_predict_merge.iloc[:,-1].to_list(),pos_label=self.tasks[task]['metric'].split('_')[1])
                 elif '-f1' in self.tasks[task]['metric']:
-                    score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1].to_list(), df_predict_merge.iloc[:,-1].to_list(), average=self.tasks[task]['metric'].split('-')[0])
+                    score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']].to_list(), df_predict_merge.iloc[:,-1].to_list(), average=self.tasks[task]['metric'].split('-')[0])
                 
-                results_dict[task + '_crossvalidation_' + self.tasks[task]['metric']] = score
+                results_dict[task + '_crossvalidation_' + self.tasks[task]['metric']] = score                
                 
         return results_dict
