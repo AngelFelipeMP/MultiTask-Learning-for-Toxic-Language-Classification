@@ -181,17 +181,17 @@ class MtlClass:
         print('\n')
         os.system(code_line)
 
-#TODO review average & score
-#TODO test average func with more data
-#TODO check the last three funcs
 #TODO Remove English tweet must tobe optional
+#TODO test average func with more data
 
     def time_str_to_float(self, time=str()):
+        '''' time from "h:m:s" (str) to seconds "s" (float) '''
         time = [ float(t) for t in time.split(':')]
         time = (time[0]*60)*60 + time[1]*60 + time[2]
         return time
     
     def seg_to_time(self,time=float()):
+        '''' time from seconds "s" to "h:m:s" '''
         hours = int(time // 3600)
         minutes = int((time % 3600) // 60)
         segundos = round((time % 3600) % 60, 6)
@@ -221,6 +221,8 @@ class MtlClass:
             average_results['epoch'] = int(average_results['epoch'])
             
             average_results['training_duration'] = self.seg_to_time(average_results['training_duration'])
+            
+            # add score caculation using all data
             for k,v in average_score.items():
                 average_results[k] = v
             
@@ -261,13 +263,13 @@ class MtlClass:
                 # save predions + labels data
                 df_predict_merge.reset_index(drop=True).to_csv(self.logs_path + '/' + model_result + '/' + task + '_predictions' + '.tsv', header=None, sep="\t")
                 
-                # caculate scores
+                # calculate scores
                 if self.tasks[task]['metric'] == 'acc':
                     score = accuracy_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1], df_predict_merge.iloc[:,-1])
                 # f1 score - not averaged
                 elif 'f1_' in self.tasks[task]['metric']:
                     score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1].to_list(), df_predict_merge.iloc[:,-1].to_list(),pos_label=self.tasks[task]['metric'].split('_')[1])
-                else:
+                elif '-f1' in self.tasks[task]['metric']:
                     score = f1_score(df_predict_merge.iloc[:,self.tasks[task]['column_idx']-1].to_list(), df_predict_merge.iloc[:,-1].to_list(), average=self.tasks[task]['metric'].split('-')[0])
                 
                 results_dict[task + '_crossvalidation_' + self.tasks[task]['metric']] = score
