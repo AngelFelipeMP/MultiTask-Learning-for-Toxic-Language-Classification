@@ -41,5 +41,7 @@ for idxs in zip(*[MTL.tasks[task_]['kfold'] for task_ in MTL.tasks.keys()]):
     if args.debug == True:
         break
 
-# Average resuls
+# average resuls
 MTL.average()
+# save resuls in drive
+MTL.upload_data()

@@ -1,3 +1,5 @@
+from pydrive2.auth import GoogleAuth
+from pydrive2.drive import GoogleDrive
 import os
 import shutil
 import pandas as pd
@@ -181,10 +183,9 @@ class MtlClass:
         
         print('\n ' + code_line + '\n')
         os.system(code_line)
-
-#TODO Remove English tweet must tobe optional
-#TODO test average func with more data
-
+        
+        
+        
     def time_str_to_float(self, time=str()):
         '''' time from "h:m:s" (str) to seconds "s" (float) '''
         time = [ float(t) for t in time.split(':')]
@@ -275,3 +276,30 @@ class MtlClass:
                 results_dict[task + '_crossvalidation_' + self.tasks[task]['metric']] = score                
                 
         return results_dict
+    
+    def upload_data(self):
+        
+        GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = self.repo_path + '/config' + '/' + 'client_secrets.json'
+        
+        gauth = GoogleAuth()
+        gauth.LoadCredentialsFile(self.repo_path + '/config' + '/' + 'mycreds.txt')
+        
+        if gauth.credentials is None:
+            # Authenticate if they're not there
+            gauth.LocalWebserverAuth()
+        
+        elif gauth.access_token_expired:
+            # Refresh them if expired
+            gauth.Refresh()
+        
+        else:
+            # Initialize the saved creds
+            gauth.Authorize()
+        # Save the current credentials to a file
+        gauth.SaveCredentialsFile(self.repo_path + '/config'+ '/' + 'mycreds.txt')
+        
+        drive = GoogleDrive(gauth)
+        shutil.make_archive(self.logs_path + '/' + 'results', 'zip', self.logs_path)
+        file_drive = drive.CreateFile({'parents': [{'id': '1o8ZHptI_J-0jP8PGdIKB3CbVrUtj3r-G'}]})
+        file_drive.SetContentFile(self.logs_path + '/' +'results.zip')
+        file_drive.Upload()
