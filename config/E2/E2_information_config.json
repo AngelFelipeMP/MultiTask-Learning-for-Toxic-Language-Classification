@@ -1,5 +1,5 @@
 {
-    "experiment": "E1",
+    "experiment": "E2",
     "device": "Auto",
     "folds_number": 2,
     "data_urls":{
