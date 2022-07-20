@@ -20,7 +20,7 @@ if not os.path.exists('../config' + '/' + args.information_config):
     
     
 #creating the mtl object
-MTL = MtlClass(info_path=args.information_config, fetch_data=True, debug=args.debug)
+MTL = MtlClass(info_path=args.information_config, fetch_data=False, debug=args.debug)
 
 # Save data folds and train the models
 for idxs in zip(*[MTL.tasks[task_]['kfold'] for task_ in MTL.tasks.keys()]):

@@ -104,9 +104,9 @@ class MtlClass:
                 self.tasks[task]['column_idx'] = list(info['tasks'].values())[0]['column_idx']
                 self.tasks[task]['train'] = [dataset for dataset in datasets if task in dataset][0]
                 self.tasks[task]['split'] = '\t' if '.tsv' in self.tasks[task]['train'] else ','
-                
+            
                 df = pd.read_csv(self.data_path + '/' + self.tasks[task]['train'], sep=self.tasks[task]['split'])
-                
+            
                 self.tasks[task]['text'] = list(df.columns)[self.tasks[task]['sent_idxs']]
                 self.tasks[task]['label'] = list(df.columns)[self.tasks[task]['column_idx']]
             
@@ -137,7 +137,7 @@ class MtlClass:
                     #remove some "\t" and "\n"
                     df[text_column] = df.loc[:,text_column].apply(lambda x: x.replace('\n', ' '))
                     df[text_column] = df.loc[:,text_column].apply(lambda x: x.replace('\t', ' '))
-                    head = None if type(df.columns.to_list()[0]) != int else True
+                    head = None if type(df.columns.to_list()[-1]) != int else True
                     
                     # save as .tsv
                     data_path_name = self.data_path + '/' + data[:-4] + '_processed' + '.tsv'
@@ -176,7 +176,6 @@ class MtlClass:
         kfold = multi_label_kfold if len(self.tasks[task]['stratify_col']) > 1 else simple_kfold
         self.tasks[task]['df'] = df
         self.tasks[task]['kfold'] = kfold.split(np.zeros(len(df)), df.iloc[:, self.tasks[task]['stratify_col']])
-        
         
         
     def train(self, model=str()):
