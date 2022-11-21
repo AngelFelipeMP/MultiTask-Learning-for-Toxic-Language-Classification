@@ -32,15 +32,15 @@ for idxs in zip(*[MTL.tasks[task_]['kfold'] for task_ in MTL.tasks.keys()]):
     #train
     for model in MTL.models():
         print(model)
-#         MTL.train(model)
+        MTL.train(model)
         
-#         #DEBUG add "Break"
-#         if args.debug == True:
-#             break
+        #DEBUG add "Break"
+        if args.debug == True:
+            break
     
-#     #DEBUG add "Break"
-#     if args.debug == True:
-#         break
+    #DEBUG add "Break"
+    if args.debug == True:
+        break
 
-# # average resuls
-# MTL.average()
+# average resuls
+MTL.average()

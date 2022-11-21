@@ -150,6 +150,11 @@ class MtlClass:
         # concat train and test
         if merge_list:
             df = pd.concat(merge_list, ignore_index=True)
+            
+            # remove duplicate instances
+            df.drop_duplicates(text_column, inplace=True)
+            
+            # save as .tsv
             df_merged_name = data.split('_')[0] + '_merge' + '_processed' + '.tsv'
             df.to_csv(self.data_path + '/' + df_merged_name, header=head, index=False, sep="\t")
 
