@@ -3,8 +3,8 @@
     "device": "1",
     "folds_number": 10,
     "data_urls":{
-        "EXIST":"https://drive.google.com/drive/folders/1_fDW6wk9Y7IOWDTDLOR-jolLjPOiImbm?usp=sharing",
-        "DETOXIS":"https://drive.google.com/drive/folders/12_HhFEIrkOtlLhRhXNYRZAsqC31mRIyv?usp=sharing"
+        "EXIST":"",
+        "DETOXIS":""
     },
     "language":"es"
 }
