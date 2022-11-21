@@ -1,0 +1,11 @@
+{
+    "experiment": "ED",
+    "device": "auto",
+    "folds_number": 2,
+    "data_urls":{
+        "EXIST":"https://drive.google.com/drive/folders/1_fDW6wk9Y7IOWDTDLOR-jolLjPOiImbm?usp=sharing",
+        "DETOXIS":"https://drive.google.com/drive/folders/12_HhFEIrkOtlLhRhXNYRZAsqC31mRIyv?usp=sharing",
+        "HatEval":"https://drive.google.com/drive/folders/1mfi8C3LV1xQi4U1bOYoiIOEVcYY76bWW?usp=sharing"
+    },
+    "language":"es"
+}

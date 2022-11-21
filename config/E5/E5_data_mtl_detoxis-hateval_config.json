@@ -1,0 +1,26 @@
+{
+    "DETOXIS": {
+        "train_data_path": "/home/adepau/repos/mtl/data/DETOXIS2021_processed_[TRAIN].tsv",
+        "validation_data_path": "/home/adepau/repos/mtl/data/DETOXIS2021_processed_[VAL].tsv",
+        "sent_idxs": [5],
+        "tasks":{
+            "toxicity_labels": {
+                "task_type": "classification",
+                "column_idx": 19,
+                "metric":"f1_toxic"
+            }
+        }
+    },
+    "HatEval": {
+        "train_data_path": "/home/adepau/repos/mtl/data/HatEval2019_processed_[TRAIN].tsv",
+        "validation_data_path": "/home/adepau/repos/mtl/data/HatEval2019_processed_[VAL].tsv",
+        "sent_idxs": [1],
+        "tasks":{
+            "hate_labels": {
+                "task_type": "classification",
+                "column_idx": 5,
+                "metric":"macro-f1"
+            }
+        }
+    }
+}

@@ -1,6 +1,6 @@
 {
-    "experiment": "E2",
-    "device": "1",
+    "experiment": "E3",
+    "device": "auto",
     "folds_number": 10,
     "data_urls":{
         "EXIST":"https://drive.google.com/drive/folders/1_fDW6wk9Y7IOWDTDLOR-jolLjPOiImbm?usp=sharing",
